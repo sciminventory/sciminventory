@@ -42,7 +42,11 @@ export function MfaSetupPanel({ required = false, verifiedFactors = [] }: { requ
     for (const factor of listed.data?.all ?? []) {
       if (factor.status === "unverified") await client.auth.mfa.unenroll({ factorId: factor.id });
     }
-    const { data, error: enrollError } = await client.auth.mfa.enroll({ factorType: "totp", friendlyName: "Priority workspace" });
+    const { data, error: enrollError } = await client.auth.mfa.enroll({
+      factorType: "totp",
+      friendlyName: "Scim-Inventory",
+      issuer: "Scim-Inventory",
+    });
     setBusy(false);
     if (enrollError || !data.totp) { setError(enrollError?.message ?? "Authenticator setup could not start."); return; }
     setEnrollment({ factorId: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret });
