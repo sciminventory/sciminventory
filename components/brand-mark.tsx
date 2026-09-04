@@ -25,6 +25,7 @@ export function BrandMark({
       <Image
         src={logo}
         alt="Priority Handling Logistics, Inc."
+        unoptimized
         className={cn(
           "h-auto object-contain object-left",
           iconOnly ? "w-28 max-w-none" : compact ? "w-24" : "w-36",
