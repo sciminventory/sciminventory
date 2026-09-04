@@ -1,0 +1,29 @@
+{
+  "services": {
+    "frontend": {
+      "root": ".",
+      "framework": "nextjs",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "screening",
+          "format": "url",
+          "env": "SCREENING_SERVICE_URL"
+        }
+      ]
+    },
+    "screening": {
+      "root": "services/screening",
+      "framework": "fastapi",
+      "entrypoint": "app.main:app"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
+  ]
+}
