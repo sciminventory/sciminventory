@@ -123,7 +123,7 @@ export function WarehouseSection() {
             controlled event. Human-readable locations keep operators moving;
             immutable ledgers keep operations accountable.
           </p>
-          <div className="mt-8 grid grid-cols-2 gap-3">
+          <div className="mt-8 grid gap-3 min-[380px]:grid-cols-2">
             {[
               { icon: ScanLine, t: "Scanner ready" },
               { icon: Boxes, t: "Bin-level stock" },
@@ -153,7 +153,7 @@ function WarehouseMap() {
     <div className="relative rounded-[28px] bg-ink p-5 text-white shadow-[0_30px_80px_rgba(11,31,58,.18)] sm:p-8">
       <div className="noise absolute inset-0 rounded-[28px] opacity-20" />
       <div className="relative">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="eyebrow text-accent">Manila Central</p>
             <h3 className="mt-2 text-lg font-bold">ZONE-A · Storage map</h3>
@@ -186,7 +186,7 @@ function WarehouseMap() {
             <i className="size-2 rounded-full bg-amber-300" />
             Needs attention
           </span>
-          <span className="ml-auto font-mono">AISLE 02 · RACKS 01—24</span>
+          <span className="w-full font-mono sm:ml-auto sm:w-auto">AISLE 02 · RACKS 01—24</span>
         </div>
       </div>
     </div>

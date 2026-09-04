@@ -119,7 +119,7 @@ export function OperationsShell({
     <div className="operations-app min-h-screen bg-[#f4f7fb] text-ink">
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[268px] border-r border-line bg-white shadow-[8px_0_30px_rgba(15,54,104,.035)] transition-[width,transform] duration-300 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-[min(268px,calc(100vw-20px))] border-r border-line bg-white shadow-[8px_0_30px_rgba(15,54,104,.035)] transition-[width,transform] duration-300 lg:translate-x-0",
           collapsed && "lg:w-[76px]",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
@@ -159,7 +159,7 @@ export function OperationsShell({
           </button>
         </div>
         <nav
-          className={cn("h-[calc(100vh-205px)] overflow-y-auto p-3", collapsed && "lg:px-2")}
+          className={cn("h-[calc(100dvh-205px)] overscroll-contain overflow-y-auto p-3", collapsed && "lg:px-2")}
           aria-label="Application navigation"
         >
           <p className={cn("eyebrow mb-2 px-2 text-muted", collapsed && "lg:hidden")}>Operations</p>
@@ -272,11 +272,11 @@ export function OperationsShell({
           </button>
         </form>
       </aside>
-      <div className={cn("transition-[padding] duration-300 lg:pl-[268px]", collapsed && "lg:pl-[76px]")}>
-        <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-line bg-white/90 px-4 backdrop-blur-xl sm:px-6">
+      <div className={cn("min-w-0 transition-[padding] duration-300 lg:pl-[268px]", collapsed && "lg:pl-[76px]")}>
+        <header className="sticky top-0 z-30 flex min-h-[72px] items-center gap-2 border-b border-line bg-white/90 px-3 py-3 backdrop-blur-xl sm:gap-3 sm:px-6">
           <button
             onClick={() => setMobileOpen(true)}
-            className="grid size-9 place-items-center rounded-lg border border-line lg:hidden"
+            className="grid size-10 shrink-0 place-items-center rounded-lg border border-line lg:hidden"
             aria-label="Open sidebar"
           >
             <Menu size={17} />
@@ -288,7 +288,7 @@ export function OperationsShell({
             </span>
           </div>
           {preview && (
-            <span className="rounded-full bg-amber-50 px-2.5 py-1 font-mono text-[8px] font-medium text-amber-800">
+            <span className="hidden rounded-full bg-amber-50 px-2.5 py-1 font-mono text-[8px] font-medium text-amber-800 min-[390px]:inline-flex">
               DEMO DATA
             </span>
           )}
@@ -308,7 +308,7 @@ export function OperationsShell({
             </Link>
           </div>
         </header>
-        <main>{children}</main>
+        <main className="min-w-0 overflow-x-clip">{children}</main>
       </div>
       {mobileOpen && (
         <button

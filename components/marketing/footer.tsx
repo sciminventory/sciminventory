@@ -33,7 +33,7 @@ export function Footer() {
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.08} distance={20}>
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-2 gap-8 min-[480px]:grid-cols-3 min-[480px]:gap-5">
               {columns.map((column) => (
                 <div key={column.title}>
                   <h3 className="eyebrow text-white/35">{column.title}</h3>

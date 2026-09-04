@@ -49,7 +49,7 @@ export function HeroPreview() {
       initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-      className="relative mx-auto mt-16 w-full max-w-[1110px]"
+      className="relative mx-auto mt-12 w-full max-w-[1110px] sm:mt-16"
     >
       <div className="absolute -inset-8 -z-10 rounded-[44px] bg-[radial-gradient(circle_at_50%_0%,rgba(37,99,235,.30),transparent_58%)] blur-2xl" />
       <div className="overflow-hidden rounded-[22px] border border-ink/15 bg-[#f7faff] shadow-[0_30px_90px_rgba(11,31,58,.16)]">
@@ -65,7 +65,7 @@ export function HeroPreview() {
           </div>
           <div className="flex items-center gap-2 text-[10px] font-semibold">
             <span className="size-2 rounded-full bg-accent shadow-[0_0_0_3px_rgba(37,99,235,.20)]" />{" "}
-            All systems synced{" "}
+            <span className="hidden min-[390px]:inline">All systems synced</span>{" "}
             <span className="ml-1 grid size-7 place-items-center rounded-full bg-ink text-[9px] text-white">
               MS
             </span>
@@ -105,7 +105,7 @@ export function HeroPreview() {
               </div>
             </div>
           </aside>
-          <div className="p-4 sm:p-6 lg:p-8">
+          <div className="min-w-0 p-3 min-[380px]:p-4 sm:p-6 lg:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="eyebrow text-muted">Friday · 04 September</div>
@@ -179,7 +179,7 @@ export function HeroPreview() {
                 <div className="mt-3 grid gap-3 lg:grid-cols-[1.25fr_.75fr]">
                   <div className="rounded-xl border border-line bg-white p-4">
                     <div className="flex items-center justify-between">
-                      <div>
+                      <div className="min-w-0">
                         <h3 className="text-xs font-bold">Inventory flow</h3>
                         <p className="mt-1 text-[9px] text-muted">
                           Units moved · last 7 days
@@ -264,7 +264,7 @@ export function HeroPreview() {
                       </span>
                       <div>
                         <div className="text-[10px] font-semibold">{title}</div>
-                        <div className="mt-0.5 text-[8px] text-muted">
+                        <div className="mt-0.5 truncate text-[8px] text-muted">
                           {ref}
                         </div>
                       </div>

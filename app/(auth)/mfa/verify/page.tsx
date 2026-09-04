@@ -14,5 +14,5 @@ export default async function MfaVerifyPage() {
   if (assurance?.currentLevel === "aal2") redirect("/dashboard");
   const factor = factors?.totp.find((item) => item.status === "verified");
   if (!factor) redirect("/mfa/setup");
-  return <main className="grid min-h-screen bg-white lg:grid-cols-[1.15fr_.85fr]"><AuthVisual showLogo={false} /><section className="flex items-center justify-center p-6 sm:p-10"><div className="w-full max-w-md"><MfaChallengePanel factorId={factor.id} /></div></section></main>;
+  return <main className="grid min-h-dvh bg-white lg:grid-cols-[1.15fr_.85fr]"><AuthVisual showLogo={false} /><section className="flex items-center justify-center p-4 sm:p-10"><div className="w-full max-w-md"><MfaChallengePanel factorId={factor.id} /></div></section></main>;
 }

@@ -79,20 +79,20 @@ export function ModulePage({ config, ...props }: Props) {
   }, [drawerOpen]);
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8 xl:p-10">
+    <div className="min-w-0 w-full p-3 min-[380px]:p-4 sm:p-6 lg:p-8 xl:p-10">
       <ScrollReveal distance={14}>
       <header className="flex flex-wrap items-end justify-between gap-5">
-        <div>
+        <div className="min-w-0">
           <p className="eyebrow text-muted">{config.eyebrow}</p>
           <h1 className="mt-2 text-2xl font-bold tracking-[-.045em]">{config.title}</h1>
           <p className="mt-2 max-w-2xl text-xs leading-5 text-muted">{config.description}</p>
         </div>
         {config.readOnly ? (
-          <Link href={modulePaths.movements} className="inline-flex h-10 items-center gap-2 rounded-lg bg-accent px-4 text-[11px] font-bold text-white hover:bg-blue-700">
+          <Link href={modulePaths.movements} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-[11px] font-bold text-white hover:bg-blue-700 sm:w-auto">
             Post movement <ArrowRight size={13} />
           </Link>
         ) : props.canManage ? (
-          <button type="button" onClick={() => setDrawerOpen(true)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-accent px-4 text-[11px] font-bold text-white hover:bg-blue-700">
+          <button type="button" onClick={() => setDrawerOpen(true)} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-[11px] font-bold text-white hover:bg-blue-700 sm:w-auto">
             <Plus size={14} /> {config.createLabel}
           </button>
         ) : (
@@ -119,11 +119,11 @@ export function ModulePage({ config, ...props }: Props) {
       <ScrollReveal className="mt-6" distance={16}>
       <section className="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_14px_40px_rgba(25,72,133,.055)]">
         <div className="flex flex-wrap items-center gap-3 border-b border-line p-4">
-          <form className="flex h-9 min-w-[220px] flex-1 items-center gap-2 rounded-lg border border-line bg-[#f8faff] px-3 sm:max-w-sm">
+          <form className="flex h-11 w-full min-w-0 flex-1 items-center gap-2 rounded-lg border border-line bg-[#f8faff] px-3 sm:min-w-[220px] sm:max-w-sm">
             <Search size={13} className="text-muted" />
             <input name="q" defaultValue={props.query} placeholder={`Search ${config.title.toLowerCase()}...`} className="w-full bg-transparent text-[11px] outline-none placeholder:text-slate-400" />
           </form>
-          <span className="ml-auto flex items-center gap-2 font-mono text-[9px] uppercase text-muted"><Filter size={12} /> {filtered.length} shown</span>
+          <span className="flex items-center gap-2 font-mono text-[9px] uppercase text-muted sm:ml-auto"><Filter size={12} /> {filtered.length} shown</span>
         </div>
         {filtered.length === 0 ? (
           <div className="grid min-h-64 place-items-center p-8 text-center">
@@ -136,7 +136,10 @@ export function ModulePage({ config, ...props }: Props) {
             </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <><div className="divide-y divide-line md:hidden">
+            {filtered.map((item) => <ItemCard key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} />)}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[820px] text-left">
               <thead className="border-b border-line bg-[#f8faff] font-mono text-[8px] uppercase tracking-wider text-muted">
                 <tr><th className="px-5 py-3 font-medium">Reference</th><th className="px-5 py-3 font-medium">Record</th><th className="px-5 py-3 font-medium">Warehouse / context</th><th className="px-5 py-3 font-medium">Quantity</th><th className="px-5 py-3 font-medium">Created / due</th><th className="px-5 py-3 font-medium">Status / action</th></tr>
@@ -145,7 +148,7 @@ export function ModulePage({ config, ...props }: Props) {
                 {filtered.map((item) => <ItemRow key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} />)}
               </tbody>
             </table>
-          </div>
+          </div></>
         )}
       </section>
       </ScrollReveal>
@@ -166,13 +169,13 @@ export function ModulePage({ config, ...props }: Props) {
               role="dialog"
               aria-modal="true"
               aria-labelledby="create-drawer-title"
-              className="fixed inset-y-0 right-0 z-[80] flex w-full flex-col border-l border-line bg-[#f8faff] shadow-[-24px_0_70px_rgba(7,23,45,.18)] sm:max-w-[580px]"
+              className="fixed inset-y-0 right-0 z-[80] flex h-dvh w-full flex-col border-l border-line bg-[#f8faff] shadow-[-24px_0_70px_rgba(7,23,45,.18)] sm:max-w-[580px]"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
             >
-              <div className="flex items-start gap-4 border-b border-line bg-white px-6 py-5">
+              <div className="flex items-start gap-3 border-b border-line bg-white px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
                 <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-accent"><PackageOpen size={19} /></span>
                 <div className="min-w-0 flex-1">
                   <p className="font-mono text-[9px] uppercase tracking-[.1em] text-blue-700">Create record</p>
@@ -194,7 +197,7 @@ function CreateForm({ config, organizationId, warehouses, products, suppliers }:
   const relatedOptions = config.needsProduct ? products : config.needsSupplier ? suppliers : [];
   return (
     <form action={createOperationalItem} className="flex min-h-0 flex-1 flex-col">
-      <div className="grid flex-1 content-start gap-5 overflow-y-auto p-6 sm:grid-cols-2">
+      <div className="grid flex-1 content-start gap-5 overflow-y-auto p-4 sm:grid-cols-2 sm:p-6">
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="module" value={config.key} />
       <Field label={config.referenceLabel} name="reference" placeholder={referencePlaceholder(config.key)} />
@@ -219,6 +222,28 @@ function CreateForm({ config, organizationId, warehouses, products, suppliers }:
   );
 }
 
+function ItemCard({ item, config, organizationId, canManage }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean }) {
+  return (
+    <article className="p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="break-all font-mono text-[10px] font-medium text-blue-700">{item.reference}</p>
+          <h2 className="mt-1 break-words text-sm font-bold">{item.title}</h2>
+          <p className="mt-1 break-words text-[10px] text-muted">{item.detail || "No additional details"}</p>
+        </div>
+        <StatusBadge status={item.status} />
+      </div>
+      <dl className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-mist p-3 text-[10px]">
+        <div><dt className="text-muted">Warehouse / context</dt><dd className="mt-1 break-words font-semibold">{item.warehouse ?? "Organization-wide"}</dd></div>
+        <div><dt className="text-muted">Quantity</dt><dd className="mt-1 font-mono font-semibold">{item.quantity === null ? "—" : formatNumber(item.quantity)}</dd></div>
+        <div><dt className="text-muted">Created</dt><dd className="mt-1 font-mono font-semibold">{formatDate(item.createdAt)}</dd></div>
+        <div><dt className="text-muted">Due</dt><dd className="mt-1 font-mono font-semibold">{item.dueAt ? formatDate(item.dueAt) : "Not set"}</dd></div>
+      </dl>
+      {(canManage || config.key === "documents") && <div className="mt-4"><ItemActions item={item} config={config} organizationId={organizationId} canManage={canManage} mobile /></div>}
+    </article>
+  );
+}
+
 function ItemRow({ item, config, organizationId, canManage }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean }) {
   return (
     <tr className="border-b border-line text-[11px] last:border-0">
@@ -228,18 +253,24 @@ function ItemRow({ item, config, organizationId, canManage }: { item: Operationa
       <td className="px-5 py-4 font-mono">{item.quantity === null ? "—" : formatNumber(item.quantity)}</td>
       <td className="px-5 py-4"><p className="font-mono text-[9px]">{formatDate(item.createdAt)}</p>{item.dueAt && <p className="mt-1 text-[9px] text-muted">Due {formatDate(item.dueAt)}</p>}</td>
       <td className="px-5 py-3">
-        <div className="flex items-center gap-2">
-        {!item.immutable && canManage && config.statusOptions.length ? (
-          <form action={updateOperationalStatus} className="flex items-center gap-2">
-            <input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="module" value={config.key} /><input type="hidden" name="itemId" value={item.id} />
-            <select name="status" defaultValue={item.status} className="h-8 rounded-lg border border-line bg-white px-2 text-[9px]">{config.statusOptions.map((status) => <option key={status} value={status}>{humanize(status)}</option>)}</select>
-            <AdminActionButton variant="secondary" className="h-8 px-2">Save</AdminActionButton>
-          </form>
-        ) : <StatusBadge status={item.status} />}
-        {config.key === "documents" && <form action={downloadDocument}><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="itemId" value={item.id} /><AdminActionButton variant="secondary" className="h-8 px-2"><Download size={11} /> Download</AdminActionButton></form>}
-        </div>
+        <ItemActions item={item} config={config} organizationId={organizationId} canManage={canManage} />
       </td>
     </tr>
+  );
+}
+
+function ItemActions({ item, config, organizationId, canManage, mobile = false }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean; mobile?: boolean }) {
+  return (
+    <div className={`flex items-center gap-2 ${mobile ? "flex-wrap" : ""}`}>
+      {!item.immutable && canManage && config.statusOptions.length ? (
+        <form action={updateOperationalStatus} className={`flex items-center gap-2 ${mobile ? "w-full" : ""}`}>
+          <input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="module" value={config.key} /><input type="hidden" name="itemId" value={item.id} />
+          <select name="status" defaultValue={item.status} className={`h-10 min-w-0 rounded-lg border border-line bg-white px-2 text-[9px] ${mobile ? "flex-1" : ""}`}>{config.statusOptions.map((status) => <option key={status} value={status}>{humanize(status)}</option>)}</select>
+          <AdminActionButton variant="secondary" className="h-10 px-3">Save</AdminActionButton>
+        </form>
+      ) : mobile ? null : <StatusBadge status={item.status} />}
+      {config.key === "documents" && <form action={downloadDocument} className={mobile ? "w-full" : ""}><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="itemId" value={item.id} /><AdminActionButton variant="secondary" className={`h-10 px-3 ${mobile ? "w-full" : ""}`}><Download size={11} /> Download</AdminActionButton></form>}
+    </div>
   );
 }
 

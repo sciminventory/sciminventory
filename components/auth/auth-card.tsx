@@ -32,7 +32,7 @@ export function AuthCard({ mode, message, action }: AuthCardProps) {
     <main className="grid min-h-screen w-full grid-cols-1 overflow-x-hidden bg-white lg:grid-cols-[minmax(0,1.15fr)_minmax(460px,.85fr)]">
       <AuthVisual showLogo={false} />
 
-      <section className="relative flex min-h-screen min-w-0 flex-col bg-white px-6 py-6 sm:px-10 lg:px-14 xl:px-20">
+      <section className="relative flex min-h-dvh min-w-0 flex-col bg-white px-4 py-5 min-[380px]:px-6 sm:px-10 sm:py-6 lg:px-14 xl:px-20">
         <div className="flex items-center justify-between">
           <Link
             href="/"
@@ -42,7 +42,7 @@ export function AuthCard({ mode, message, action }: AuthCardProps) {
           </Link>
         </div>
 
-        <div className="auth-enter mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center py-12">
+        <div className="auth-enter mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center py-8 sm:py-12">
           <div className="mb-8 flex size-12 items-center justify-center rounded-2xl bg-blue-50 text-accent ring-1 ring-blue-100">
             {signup ? <Building2 size={21} /> : <LockKeyhole size={21} />}
           </div>

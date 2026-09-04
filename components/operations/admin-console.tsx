@@ -118,11 +118,11 @@ export function AdminConsole(props: Props) {
   }
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8 xl:p-10">
+    <div className="min-w-0 w-full p-3 min-[380px]:p-4 sm:p-6 lg:p-8 xl:p-10">
       <header className="flex flex-wrap items-end justify-between gap-5">
         <div>
           <p className="eyebrow text-muted">Workspace governance</p>
-          <div className="mt-2 flex items-center gap-3">
+          <div className="mt-2 flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-bold tracking-[-.045em]">
               Administration
             </h1>
@@ -135,7 +135,7 @@ export function AdminConsole(props: Props) {
             scope.
           </p>
         </div>
-        <nav className="hide-scrollbar flex max-w-full gap-1 overflow-x-auto rounded-xl border border-line bg-white p-1 text-[10px] font-semibold">
+        <nav className="hide-scrollbar flex w-full max-w-full gap-1 overflow-x-auto rounded-xl border border-line bg-white p-1 text-[10px] font-semibold lg:w-auto">
           <a href="#people" className="rounded-lg px-3 py-2 hover:bg-mist">
             People
           </a>
@@ -284,7 +284,10 @@ export function AdminConsole(props: Props) {
             </form>
           </div>
 
-          <div className="min-w-0 overflow-x-auto">
+          <div className="divide-y divide-line md:hidden">
+            {props.members.map((member) => <MemberCard key={member.id} member={member} organizationId={props.organization.id} isCurrentUser={member.userId === props.currentUserId} />)}
+          </div>
+          <div className="hidden min-w-0 overflow-x-auto md:block">
             <table className="w-full min-w-[760px] text-left">
               <thead>
                 <tr className="border-b border-line bg-mist/60 font-mono text-[8px] uppercase tracking-wider text-muted">
@@ -565,6 +568,21 @@ export function AdminConsole(props: Props) {
         </div>
       </section>
     </div>
+  );
+}
+
+function MemberCard({ member, organizationId, isCurrentUser }: { member: AdminMember; organizationId: string; isCurrentUser: boolean }) {
+  const owner = member.role === "owner";
+  return (
+    <article className="p-4">
+      <div className="flex items-start gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-ink text-[10px] font-bold text-white">{initials(member.fullName)}</span>
+        <div className="min-w-0 flex-1"><p className="break-words text-sm font-bold">{member.fullName} {isCurrentUser && <span className="text-muted">(you)</span>}</p><p className="mt-1 break-all text-[10px] text-muted">{member.email}</p></div>
+        <StatusBadge status={member.status} />
+      </div>
+      <p className="mt-4 font-mono text-[9px] text-muted">Added {formatDate(member.invitedAt ?? member.createdAt)}</p>
+      {owner ? <div className="mt-4 flex items-center justify-between rounded-xl bg-blue-50 p-3"><span className="font-mono text-[9px] text-blue-700">OWNER</span><span className="text-[9px] text-muted">Protected</span></div> : <form action={updateMember} className="mt-4 grid grid-cols-2 gap-3"><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="membershipId" value={member.id} /><label><span className={labelClass}>Role</span><select name="role" defaultValue={member.role} className={fieldClass}>{manageableRoles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</select></label><label><span className={labelClass}>Status</span><select name="status" defaultValue={member.status} className={fieldClass}><option value="invited">Invited</option><option value="active">Active</option><option value="suspended">Suspended</option></select></label><AdminActionButton variant="secondary" className="col-span-2 h-11"><Save size={12} /> Save member</AdminActionButton></form>}
+    </article>
   );
 }
 

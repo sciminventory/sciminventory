@@ -9,7 +9,7 @@ type Range = keyof DashboardData["throughput"];
 
 export function BusinessCharts({ data }: { data: DashboardData }) {
   return (
-    <div className="grid gap-5 xl:grid-cols-[1.45fr_.75fr]">
+    <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(280px,.75fr)]">
       <InventoryTrendChart throughput={data.throughput} total={data.throughputTotal} trend={data.throughputTrend} />
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-1">
         <ServiceLevelChart service={data.service} />
@@ -44,8 +44,8 @@ function InventoryTrendChart({ throughput, total, trend }: { throughput: Dashboa
 
   return (
     <section className="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_18px_55px_rgba(25,72,133,.07)]">
-      <div className="flex flex-wrap items-start justify-between gap-4 px-6 pb-2 pt-6">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-4 px-4 pb-2 pt-5 sm:px-6 sm:pt-6">
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="grid size-9 place-items-center rounded-xl bg-blue-50 text-accent"><TrendingUp size={17} /></span>
             <div><h2 className="text-base font-bold">Inventory throughput</h2><p className="mt-0.5 text-[11px] text-muted">Units processed across the network</p></div>
@@ -55,7 +55,7 @@ function InventoryTrendChart({ throughput, total, trend }: { throughput: Dashboa
             <span className={`mb-1 rounded-full px-2 py-1 text-[10px] font-bold ${trend >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>{trend >= 0 ? "+" : ""}{trend.toFixed(1)}%</span>
           </div>
         </div>
-        <div className="flex rounded-xl border border-line bg-[#f7faff] p-1">
+        <div className="flex max-w-full overflow-x-auto rounded-xl border border-line bg-[#f7faff] p-1">
           {(Object.keys(throughput) as Range[]).map((item) => (
             <button key={item} onClick={() => { setRange(item); setHovered(null); }} className={`rounded-lg px-3 py-2 font-mono text-[9px] font-medium transition ${range === item ? "bg-white text-accent shadow-sm" : "text-muted hover:text-ink"}`}>{item}</button>
           ))}
@@ -66,7 +66,7 @@ function InventoryTrendChart({ throughput, total, trend }: { throughput: Dashboa
           <p className="font-mono text-[8px] uppercase text-muted">Throughput index</p>
           <p className="mt-1 text-sm font-bold text-blue-700">{formatCompact(selected?.value ?? 0)}</p>
         </div>
-        <svg viewBox={`0 0 ${width} ${height}`} className="h-[272px] w-full" role="img" aria-label={`Inventory throughput chart for ${range}`} onMouseLeave={() => setHovered(null)}>
+        <svg viewBox={`0 0 ${width} ${height}`} className="h-[220px] w-full sm:h-[272px]" role="img" aria-label={`Inventory throughput chart for ${range}`} onMouseLeave={() => setHovered(null)}>
           <defs>
             <linearGradient id="inventory-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#2563eb" stopOpacity=".24" /><stop offset="100%" stopColor="#2563eb" stopOpacity="0" /></linearGradient>
             <filter id="line-glow"><feGaussianBlur stdDeviation="4" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
@@ -92,10 +92,10 @@ function ServiceLevelChart({ service }: { service: DashboardData["service"] }) {
   const circumference = 2 * Math.PI * 42;
   const offset = circumference * (1 - Math.min(100, Math.max(0, service.rate)) / 100);
   return (
-    <section className="rounded-2xl border border-line bg-gradient-to-br from-[#0b1f3a] to-[#123a72] p-6 text-white shadow-[0_18px_55px_rgba(11,31,58,.16)]">
+    <section className="rounded-2xl border border-line bg-gradient-to-br from-[#0b1f3a] to-[#123a72] p-5 text-white shadow-[0_18px_55px_rgba(11,31,58,.16)] sm:p-6">
       <div className="flex items-start justify-between"><div><p className="font-mono text-[9px] uppercase tracking-[.12em] text-blue-200">Service level</p><h2 className="mt-2 text-base font-bold">Orders fulfilled</h2></div><ArrowUpRight size={17} className="text-blue-200" /></div>
-      <div className="mt-5 flex items-center gap-5">
-        <div className="relative size-32 shrink-0">
+      <div className="mt-5 flex flex-col items-stretch gap-5 min-[420px]:flex-row min-[420px]:items-center">
+        <div className="relative mx-auto size-28 shrink-0 min-[420px]:mx-0 sm:size-32">
           <svg viewBox="0 0 100 100" className="-rotate-90"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.1)" strokeWidth="8" /><motion.circle cx="50" cy="50" r="42" fill="none" stroke="#78a8ff" strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} initial={{ strokeDashoffset: circumference }} whileInView={{ strokeDashoffset: offset }} viewport={{ once: false }} transition={{ duration: reduceMotion ? 0 : 1.2, ease: [0.22, 1, 0.36, 1] }} /></svg>
           <div className="absolute inset-0 grid place-items-center text-center"><div><strong className="text-2xl">{service.rate.toFixed(1)}%</strong><p className="mt-1 text-[9px] text-blue-200">OTIF</p></div></div>
         </div>
@@ -111,7 +111,7 @@ function ProcurementSpendChart({ spend }: { spend: DashboardData["spend"] }) {
   const reduceMotion = useReducedMotion();
   const maxAmount = Math.max(...spend.map((row) => row.amount), 1);
   return (
-    <section className="rounded-2xl border border-line bg-white p-6 shadow-[0_18px_55px_rgba(25,72,133,.07)]">
+    <section className="rounded-2xl border border-line bg-white p-5 shadow-[0_18px_55px_rgba(25,72,133,.07)] sm:p-6">
       <div className="flex items-start justify-between"><div><p className="font-mono text-[9px] uppercase tracking-[.12em] text-muted">Committed spend</p><h2 className="mt-2 text-base font-bold">By category</h2></div><span className="rounded-lg bg-blue-50 px-2 py-1 font-mono text-[9px] text-blue-700">SEP</span></div>
       <div className="mt-5 space-y-4">
         {spend.map((row, index) => <div key={row.label}><div className="mb-2 flex justify-between text-[10px]"><span className="font-semibold">{row.label}</span><span className="font-mono text-muted">{formatCurrency(row.amount)}</span></div><div className="h-2 overflow-hidden rounded-full bg-blue-50"><motion.div className="h-full rounded-full bg-gradient-to-r from-blue-700 to-blue-400" initial={{ width: 0 }} whileInView={{ width: `${row.amount === 0 ? 0 : Math.max(8, (row.amount / maxAmount) * 100)}%` }} viewport={{ once: false }} transition={{ duration: reduceMotion ? 0 : .8, delay: index * .12, ease: [0.22, 1, 0.36, 1] }} /></div></div>)}

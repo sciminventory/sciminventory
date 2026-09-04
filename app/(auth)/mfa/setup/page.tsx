@@ -12,5 +12,5 @@ export default async function MfaSetupPage() {
   if (!user) redirect("/login");
   const { data } = await client.auth.mfa.listFactors();
   if (data?.totp.some((factor) => factor.status === "verified")) redirect("/mfa/verify");
-  return <main className="grid min-h-screen bg-white lg:grid-cols-[1.05fr_.95fr]"><AuthVisual showLogo={false} /><section className="flex items-center justify-center p-6 sm:p-10"><div className="w-full max-w-xl"><p className="mb-5 text-center text-[10px] font-medium text-blue-700">Required before accessing your workspace</p><MfaSetupPanel required /></div></section></main>;
+  return <main className="grid min-h-dvh bg-white lg:grid-cols-[1.05fr_.95fr]"><AuthVisual showLogo={false} /><section className="flex items-center justify-center p-3 min-[380px]:p-5 sm:p-10"><div className="w-full max-w-xl"><p className="mb-5 text-center text-[10px] font-medium text-blue-700">Required before accessing your workspace</p><MfaSetupPanel required /></div></section></main>;
 }

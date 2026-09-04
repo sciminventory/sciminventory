@@ -22,7 +22,7 @@ export function RecoveryCard({ mode, message, action }: RecoveryCardProps) {
   return (
     <main className="grid min-h-screen w-full grid-cols-1 overflow-x-hidden bg-white lg:grid-cols-[minmax(0,1.15fr)_minmax(460px,.85fr)]">
       <AuthVisual showLogo={!resetting} />
-      <section className="relative flex min-h-screen min-w-0 flex-col bg-white px-6 py-6 sm:px-10 lg:px-14 xl:px-20">
+      <section className="relative flex min-h-dvh min-w-0 flex-col bg-white px-4 py-5 min-[380px]:px-6 sm:px-10 sm:py-6 lg:px-14 xl:px-20">
         <div className="flex items-center justify-between">
           {!resetting && <BrandMark className="lg:hidden" />}
           <Link
@@ -33,7 +33,7 @@ export function RecoveryCard({ mode, message, action }: RecoveryCardProps) {
           </Link>
         </div>
 
-        <div className="auth-enter mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center py-12">
+        <div className="auth-enter mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center py-8 sm:py-12">
           <div className="mb-8 flex size-12 items-center justify-center rounded-2xl bg-blue-50 text-accent ring-1 ring-blue-100">
             {resetting ? <KeyRound size={21} /> : <Mail size={21} />}
           </div>
