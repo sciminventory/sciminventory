@@ -43,7 +43,7 @@ export function MarketingHeader() {
             <a
               key={label}
               href={href}
-              className="text-[13px] font-semibold text-ink/65 transition-colors hover:text-ink"
+              className="text-sm font-semibold text-ink/65 transition-colors hover:text-ink"
             >
               {label}
             </a>

@@ -100,9 +100,9 @@ const roleAccess = [
 ] as const;
 
 const fieldClass =
-  "h-10 w-full rounded-lg border border-line bg-white px-3 text-xs text-ink outline-none transition placeholder:text-slate-400 focus:border-accent focus:ring-3 focus:ring-blue-100";
+  "h-10 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink outline-none transition placeholder:text-slate-400 focus:border-accent focus:ring-3 focus:ring-blue-100";
 const labelClass =
-  "mb-2 block text-[10px] font-bold uppercase tracking-[.06em] text-muted";
+  "mb-2 block text-sm font-bold uppercase tracking-[.06em] text-muted";
 
 export function AdminConsole(props: Props) {
   const activeMembers = props.members.filter(
@@ -126,16 +126,16 @@ export function AdminConsole(props: Props) {
             <h1 className="text-2xl font-bold tracking-[-.045em]">
               Administration
             </h1>
-            <span className="rounded-full bg-blue-50 px-2.5 py-1 font-mono text-[8px] font-medium text-blue-700">
+            <span className="rounded-full bg-blue-50 px-2.5 py-1 font-mono text-xs font-medium text-blue-700">
               OWNER ACCESS
             </span>
           </div>
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-2 text-sm text-muted">
             Manage organization identity, people, roles, warehouses, and access
             scope.
           </p>
         </div>
-        <nav className="hide-scrollbar flex w-full max-w-full gap-1 overflow-x-auto rounded-xl border border-line bg-white p-1 text-[10px] font-semibold lg:w-auto">
+        <nav className="hide-scrollbar flex w-full max-w-full gap-1 overflow-x-auto rounded-xl border border-line bg-white p-1 text-sm font-semibold lg:w-auto">
           <a href="#people" className="rounded-lg px-3 py-2 hover:bg-mist">
             People
           </a>
@@ -162,7 +162,7 @@ export function AdminConsole(props: Props) {
 
       {(props.success || props.error || props.setupError) && (
         <div
-          className={`mt-6 flex items-start gap-3 rounded-xl border px-4 py-3 text-xs ${props.error || props.setupError ? "border-red-200 bg-red-50 text-red-800" : "border-blue-200 bg-blue-50 text-blue-800"}`}
+          className={`mt-6 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${props.error || props.setupError ? "border-red-200 bg-red-50 text-red-800" : "border-blue-200 bg-blue-50 text-blue-800"}`}
           role="status"
         >
           {props.error || props.setupError ? (
@@ -204,12 +204,12 @@ export function AdminConsole(props: Props) {
           },
         ].map(({ icon: Icon, label, value, detail }) => (
           <div key={label} className="border-b border-r border-line p-5">
-            <div className="flex items-center justify-between text-[10px] font-semibold text-muted">
+            <div className="flex items-center justify-between text-sm font-semibold text-muted">
               {label}
               <Icon size={15} />
             </div>
             <p className="mt-4 text-2xl font-bold tracking-[-.04em]">{value}</p>
-            <p className="mt-1 text-[9px] text-muted">{detail}</p>
+            <p className="mt-1 text-xs text-muted">{detail}</p>
           </div>
         ))}
       </div>
@@ -217,7 +217,7 @@ export function AdminConsole(props: Props) {
       <section id="roles" className="mt-6 scroll-mt-24 border border-line bg-white">
         <SectionHeader icon={ShieldCheck} title="Role-based access control" description="Permissions are verified in the interface, every server action, and database row policies." />
         <div className="grid gap-px bg-line sm:grid-cols-2 xl:grid-cols-3">
-          {roleAccess.map((item) => <article key={item.role} className="bg-white p-5"><div className="flex items-center gap-2"><span className="grid size-7 place-items-center rounded-lg bg-blue-50 text-blue-700"><KeyRound size={13} /></span><h3 className="text-xs font-bold">{item.role}</h3></div><p className="mt-3 text-[10px] leading-5 text-muted">{item.scope}</p></article>)}
+          {roleAccess.map((item) => <article key={item.role} className="bg-white p-5"><div className="flex items-center gap-2"><span className="grid size-7 place-items-center rounded-lg bg-blue-50 text-blue-700"><KeyRound size={13} /></span><h3 className="text-sm font-bold">{item.role}</h3></div><p className="mt-3 text-sm leading-5 text-muted">{item.scope}</p></article>)}
         </div>
       </section>
 
@@ -232,13 +232,13 @@ export function AdminConsole(props: Props) {
         />
         <div className="grid xl:grid-cols-[360px_1fr]">
           <div className="border-b border-line p-5 xl:border-b-0 xl:border-r">
-            <h3 className="text-xs font-bold">Invite a team member</h3>
-            <p className="mt-2 text-[10px] leading-5 text-muted">
+            <h3 className="text-sm font-bold">Invite a team member</h3>
+            <p className="mt-2 text-sm leading-5 text-muted">
               A secure invitation is sent by email. Access activates after the
               user accepts and sets a password.
             </p>
             {!props.inviteEnabled && (
-              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-[10px] leading-5 text-amber-900">
+              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-900">
                 The secure invitation service is not configured. Ask a system
                 administrator to enable server-side invitations.
               </div>
@@ -290,7 +290,7 @@ export function AdminConsole(props: Props) {
           <div className="hidden min-w-0 overflow-x-auto md:block">
             <table className="w-full min-w-[760px] text-left">
               <thead>
-                <tr className="border-b border-line bg-mist/60 font-mono text-[8px] uppercase tracking-wider text-muted">
+                <tr className="border-b border-line bg-mist/60 font-mono text-xs uppercase tracking-wider text-muted">
                   <th className="px-5 py-3 font-medium">Team member</th>
                   <th className="px-4 py-3 font-medium">Role</th>
                   <th className="px-4 py-3 font-medium">Status</th>
@@ -423,10 +423,10 @@ export function AdminConsole(props: Props) {
                       <MapPin size={14} />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[11px] font-bold">
+                      <p className="truncate text-sm font-bold">
                         {member?.fullName ?? "Unknown member"}
                       </p>
-                      <p className="mt-0.5 truncate text-[9px] text-muted">
+                      <p className="mt-0.5 truncate text-xs text-muted">
                         {warehouse?.code} · {warehouse?.name}
                       </p>
                     </div>
@@ -492,7 +492,7 @@ export function AdminConsole(props: Props) {
               placeholder="PH"
               maxLength={2}
             />
-            <label className="flex h-10 items-center gap-2 text-[10px] font-semibold">
+            <label className="flex h-10 items-center gap-2 text-sm font-semibold">
               <input
                 type="checkbox"
                 name="isActive"
@@ -551,14 +551,14 @@ export function AdminConsole(props: Props) {
                     <Clock3 size={14} />
                   </span>
                   <div>
-                    <p className="text-[11px] font-bold">
+                    <p className="text-sm font-bold">
                       {humanizeAction(event.action)}
                     </p>
-                    <p className="mt-1 text-[9px] text-muted">
+                    <p className="mt-1 text-xs text-muted">
                       {actor?.fullName ?? "System"} · {event.entityType}
                     </p>
                   </div>
-                  <time className="font-mono text-[9px] text-muted">
+                  <time className="font-mono text-xs text-muted">
                     {formatDate(event.occurredAt)}
                   </time>
                 </div>
@@ -576,12 +576,12 @@ function MemberCard({ member, organizationId, isCurrentUser }: { member: AdminMe
   return (
     <article className="p-4">
       <div className="flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-ink text-[10px] font-bold text-white">{initials(member.fullName)}</span>
-        <div className="min-w-0 flex-1"><p className="break-words text-sm font-bold">{member.fullName} {isCurrentUser && <span className="text-muted">(you)</span>}</p><p className="mt-1 break-all text-[10px] text-muted">{member.email}</p></div>
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-ink text-sm font-bold text-white">{initials(member.fullName)}</span>
+        <div className="min-w-0 flex-1"><p className="break-words text-sm font-bold">{member.fullName} {isCurrentUser && <span className="text-muted">(you)</span>}</p><p className="mt-1 break-all text-sm text-muted">{member.email}</p></div>
         <StatusBadge status={member.status} />
       </div>
-      <p className="mt-4 font-mono text-[9px] text-muted">Added {formatDate(member.invitedAt ?? member.createdAt)}</p>
-      {owner ? <div className="mt-4 flex items-center justify-between rounded-xl bg-blue-50 p-3"><span className="font-mono text-[9px] text-blue-700">OWNER</span><span className="text-[9px] text-muted">Protected</span></div> : <form action={updateMember} className="mt-4 grid grid-cols-2 gap-3"><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="membershipId" value={member.id} /><label><span className={labelClass}>Role</span><select name="role" defaultValue={member.role} className={fieldClass}>{manageableRoles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</select></label><label><span className={labelClass}>Status</span><select name="status" defaultValue={member.status} className={fieldClass}><option value="invited">Invited</option><option value="active">Active</option><option value="suspended">Suspended</option></select></label><AdminActionButton variant="secondary" className="col-span-2 h-11"><Save size={12} /> Save member</AdminActionButton></form>}
+      <p className="mt-4 font-mono text-xs text-muted">Added {formatDate(member.invitedAt ?? member.createdAt)}</p>
+      {owner ? <div className="mt-4 flex items-center justify-between rounded-xl bg-blue-50 p-3"><span className="font-mono text-xs text-blue-700">OWNER</span><span className="text-xs text-muted">Protected</span></div> : <form action={updateMember} className="mt-4 grid grid-cols-2 gap-3"><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="membershipId" value={member.id} /><label><span className={labelClass}>Role</span><select name="role" defaultValue={member.role} className={fieldClass}>{manageableRoles.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</select></label><label><span className={labelClass}>Status</span><select name="status" defaultValue={member.status} className={fieldClass}><option value="invited">Invited</option><option value="active">Active</option><option value="suspended">Suspended</option></select></label><AdminActionButton variant="secondary" className="col-span-2 h-11"><Save size={12} /> Save member</AdminActionButton></form>}
     </article>
   );
 }
@@ -600,15 +600,15 @@ function MemberRow({
     <tr className="border-b border-line last:border-0">
       <td className="px-5 py-4">
         <div className="flex items-center gap-3">
-          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-ink text-[9px] font-bold text-white">
+          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-ink text-xs font-bold text-white">
             {initials(member.fullName)}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-[11px] font-bold">
+            <p className="truncate text-sm font-bold">
               {member.fullName}{" "}
               {isCurrentUser && <span className="text-muted">(you)</span>}
             </p>
-            <p className="mt-0.5 truncate text-[9px] text-muted">
+            <p className="mt-0.5 truncate text-xs text-muted">
               {member.email}
             </p>
           </div>
@@ -617,17 +617,17 @@ function MemberRow({
       {owner ? (
         <>
           <td className="px-4 py-4">
-            <span className="rounded-full bg-blue-50 px-2 py-1 font-mono text-[8px] text-blue-700">
+            <span className="rounded-full bg-blue-50 px-2 py-1 font-mono text-xs text-blue-700">
               OWNER
             </span>
           </td>
           <td className="px-4 py-4">
             <StatusBadge status={member.status} />
           </td>
-          <td className="px-4 py-4 font-mono text-[9px] text-muted">
+          <td className="px-4 py-4 font-mono text-xs text-muted">
             {formatDate(member.createdAt)}
           </td>
-          <td className="px-5 py-4 text-right text-[9px] text-muted">
+          <td className="px-5 py-4 text-right text-xs text-muted">
             Protected
           </td>
         </>
@@ -653,7 +653,7 @@ function MemberEditCells({
           form={formId}
           name="role"
           defaultValue={member.role}
-          className="h-9 w-44 rounded-lg border border-line bg-white px-2 text-[10px]"
+          className="h-9 w-44 rounded-lg border border-line bg-white px-2 text-sm"
         >
           {manageableRoles.map((role) => (
             <option key={role.value} value={role.value}>
@@ -667,14 +667,14 @@ function MemberEditCells({
           form={formId}
           name="status"
           defaultValue={member.status}
-          className="h-9 w-28 rounded-lg border border-line bg-white px-2 text-[10px]"
+          className="h-9 w-28 rounded-lg border border-line bg-white px-2 text-sm"
         >
           <option value="invited">Invited</option>
           <option value="active">Active</option>
           <option value="suspended">Suspended</option>
         </select>
       </td>
-      <td className="px-4 py-4 font-mono text-[9px] text-muted">
+      <td className="px-4 py-4 font-mono text-xs text-muted">
         {formatDate(member.invitedAt ?? member.createdAt)}
       </td>
       <td className="px-5 py-3 text-right">
@@ -713,7 +713,7 @@ function WarehouseForm({
         defaultValue={warehouse.countryCode ?? ""}
         maxLength={2}
       />
-      <label className="flex h-9 items-center gap-2 text-[10px] font-semibold">
+      <label className="flex h-9 items-center gap-2 text-sm font-semibold">
         <input
           type="checkbox"
           name="isActive"
@@ -745,7 +745,7 @@ function SectionHeader({
       </span>
       <div>
         <h2 className="text-sm font-bold">{title}</h2>
-        <p className="mt-1 text-[10px] text-muted">{description}</p>
+        <p className="mt-1 text-sm text-muted">{description}</p>
       </div>
     </div>
   );
@@ -774,7 +774,7 @@ function StatusBadge({ status }: { status: MembershipStatus }) {
         ? "bg-amber-50 text-amber-800"
         : "bg-red-50 text-red-700";
   return (
-    <span className={`rounded-full px-2 py-1 font-mono text-[8px] ${tone}`}>
+    <span className={`rounded-full px-2 py-1 font-mono text-xs ${tone}`}>
       {status.toUpperCase()}
     </span>
   );
@@ -799,7 +799,7 @@ function AccessDenied({ role }: { role: Role }) {
 
 function EmptyLine({ text }: { text: string }) {
   return (
-    <p className="flex items-center gap-2 py-3 text-[10px] text-muted">
+    <p className="flex items-center gap-2 py-3 text-sm text-muted">
       <CircleAlert size={13} /> {text}
     </p>
   );

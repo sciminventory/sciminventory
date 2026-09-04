@@ -24,7 +24,7 @@ export function AdminActionButton({
       type="submit"
       disabled={pending || disabled}
       className={cn(
-        "inline-flex h-9 items-center justify-center gap-2 rounded-lg px-3 text-[11px] font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60",
+        "inline-flex h-9 items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60",
         variant === "primary" && "bg-accent text-white hover:bg-blue-700",
         variant === "secondary" &&
           "border border-line bg-white text-ink hover:border-blue-200 hover:bg-blue-50",

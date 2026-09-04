@@ -39,5 +39,5 @@ export function RecruitmentRealtimeSync({ organizationId }: { organizationId: st
     };
   }, [organizationId, router]);
 
-  return <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 font-mono text-[8px] font-medium text-emerald-700"><i className="size-1.5 animate-pulse rounded-full bg-emerald-500" /> LIVE</span>;
+  return <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 font-mono text-xs font-medium text-emerald-700"><i className="size-1.5 animate-pulse rounded-full bg-emerald-500" /> LIVE</span>;
 }

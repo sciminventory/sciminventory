@@ -144,14 +144,14 @@ export function OperationsShell({
         </div>
         <div className={cn("border-b border-line p-3", collapsed && "lg:px-2")}>
           <button title={workspaceName} className={cn("flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-mist", collapsed && "lg:justify-center")}>
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 text-[11px] font-bold text-white shadow-sm">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 text-sm font-bold text-white shadow-sm">
               ND
             </span>
             <span className={cn("min-w-0 flex-1", collapsed && "lg:hidden")}>
-              <span className="block truncate text-xs font-bold">
+              <span className="block truncate text-sm font-bold">
                 {workspaceName}
               </span>
-              <span className="block text-[9px] text-muted">
+              <span className="block text-xs text-muted">
                 Organization workspace
               </span>
             </span>
@@ -215,7 +215,7 @@ export function OperationsShell({
                         key={sub.href}
                         onClick={() => setMobileOpen(false)}
                         className={cn(
-                          "block rounded-lg px-2 py-2.5 text-[11px] text-muted hover:bg-mist hover:text-ink",
+                          "block rounded-lg px-2 py-2.5 text-sm text-muted hover:bg-mist hover:text-ink",
                           pathname.startsWith(sub.href) && "bg-blue-50 font-bold text-blue-700",
                         )}
                       >
@@ -256,7 +256,7 @@ export function OperationsShell({
           </Link>}
         </nav>
         <form action={logoutAction} className={cn("absolute inset-x-3 bottom-3", collapsed && "lg:inset-x-2")}>
-          <button title={collapsed ? `Sign out ${userName}` : undefined} className={cn("flex w-full items-center gap-3 rounded-xl border border-line px-3 py-2.5 text-[11px] text-muted hover:bg-mist", collapsed && "lg:justify-center lg:px-2")}>
+          <button title={collapsed ? `Sign out ${userName}` : undefined} className={cn("flex w-full items-center gap-3 rounded-xl border border-line px-3 py-2.5 text-sm text-muted hover:bg-mist", collapsed && "lg:justify-center lg:px-2")}>
             <span className="grid size-8 shrink-0 place-items-center rounded-full bg-blue-100 font-bold text-blue-800">
               {userName.slice(0, 2).toUpperCase()}
             </span>
@@ -264,7 +264,7 @@ export function OperationsShell({
               <span className="block truncate font-semibold text-ink">
                 {userName}
               </span>
-              <span className="block truncate font-mono text-[8px] uppercase text-muted">
+              <span className="block truncate font-mono text-xs uppercase text-muted">
                 {userRole.replaceAll("_", " ")}
               </span>
             </span>
@@ -281,19 +281,19 @@ export function OperationsShell({
           >
             <Menu size={17} />
           </button>
-          <div className="hidden h-9 w-full max-w-sm items-center gap-2 rounded-lg border border-line bg-[#f8f9f5] px-3 text-[11px] text-muted sm:flex">
+          <div className="hidden h-9 w-full max-w-sm items-center gap-2 rounded-lg border border-line bg-[#f8f9f5] px-3 text-sm text-muted sm:flex">
             <Search size={14} /> Search SKU, PO, supplier or location{" "}
-            <span className="ml-auto flex items-center gap-0.5 rounded border border-line bg-white px-1.5 py-0.5 font-mono text-[8px]">
+            <span className="ml-auto flex items-center gap-0.5 rounded border border-line bg-white px-1.5 py-0.5 font-mono text-xs">
               <Command size={9} />K
             </span>
           </div>
           {preview && (
-            <span className="hidden rounded-full bg-amber-50 px-2.5 py-1 font-mono text-[8px] font-medium text-amber-800 min-[390px]:inline-flex">
+            <span className="hidden rounded-full bg-amber-50 px-2.5 py-1 font-mono text-xs font-medium text-amber-800 min-[390px]:inline-flex">
               DEMO DATA
             </span>
           )}
           <div className="ml-auto flex items-center gap-2">
-            {canManageOperationalModule("products", effectiveRole) && <Link href={modulePaths.products + "?create=1"} className="hidden h-9 items-center gap-2 rounded-lg bg-ink px-3 text-[11px] font-bold text-white sm:flex">
+            {canManageOperationalModule("products", effectiveRole) && <Link href={modulePaths.products + "?create=1"} className="hidden h-9 items-center gap-2 rounded-lg bg-ink px-3 text-sm font-bold text-white sm:flex">
               <Plus size={14} />
               Quick create
             </Link>}
@@ -301,7 +301,7 @@ export function OperationsShell({
               <Bell size={15} />
               <i className="absolute right-2 top-2 size-1.5 rounded-full bg-red-500" />
             </Link>
-            <Link href="/dashboard/administration#warehouses" className="hidden h-9 items-center gap-2 rounded-lg border border-line px-3 text-[11px] font-semibold md:flex">
+            <Link href="/dashboard/administration#warehouses" className="hidden h-9 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold md:flex">
               <Building2 size={14} />
               Warehouses
               <ArrowRight size={11} />

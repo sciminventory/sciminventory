@@ -56,17 +56,17 @@ export function HeroPreview() {
         <div className="flex h-12 items-center justify-between border-b border-line bg-white px-4">
           <div className="flex items-center gap-4">
             <BrandMark compact />
-            <div className="hidden h-7 w-44 items-center gap-2 rounded-lg bg-mist px-3 text-[10px] text-muted sm:flex">
+            <div className="hidden h-7 w-44 items-center gap-2 rounded-lg bg-mist px-3 text-xs text-muted sm:flex">
               <Search size={12} /> Search operations{" "}
               <span className="ml-auto flex items-center">
                 <Command size={9} />K
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-[10px] font-semibold">
+          <div className="flex items-center gap-2 text-xs font-semibold">
             <span className="size-2 rounded-full bg-accent shadow-[0_0_0_3px_rgba(37,99,235,.20)]" />{" "}
             <span className="hidden min-[390px]:inline">All systems synced</span>{" "}
-            <span className="ml-1 grid size-7 place-items-center rounded-full bg-ink text-[9px] text-white">
+            <span className="ml-1 grid size-7 place-items-center rounded-full bg-ink text-[10px] text-white">
               MS
             </span>
           </div>
@@ -85,7 +85,7 @@ export function HeroPreview() {
               <div
                 key={item}
                 className={cn(
-                  "mb-1 flex items-center gap-2 rounded-lg px-2.5 py-2 text-[11px] font-semibold",
+                  "mb-1 flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-semibold",
                   index === 0 ? "bg-ink text-white" : "text-muted",
                 )}
               >
@@ -100,7 +100,7 @@ export function HeroPreview() {
             ))}
             <div className="mt-16 rounded-xl bg-mist p-3">
               <div className="eyebrow text-muted">Warehouse</div>
-              <div className="mt-2 flex items-center gap-2 text-[10px] font-bold">
+              <div className="mt-2 flex items-center gap-2 text-xs font-bold">
                 <Warehouse size={13} /> Manila Central
               </div>
             </div>
@@ -112,15 +112,15 @@ export function HeroPreview() {
                 <h2 className="mt-2 text-xl font-bold tracking-[-.04em] sm:text-2xl">
                   Good morning, Maria.
                 </h2>
-                <p className="mt-1 text-[11px] text-muted">
+                <p className="mt-1 text-xs text-muted">
                   Here’s what needs your attention today.
                 </p>
               </div>
-              <button className="flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-[10px] font-semibold">
+              <button className="flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-xs font-semibold">
                 All warehouses <ChevronDown size={12} />
               </button>
             </div>
-            <div className="mt-6 flex gap-5 border-b border-line text-[11px] font-semibold">
+            <div className="mt-6 flex gap-5 border-b border-line text-xs font-semibold">
               {tabs.map((tab, index) => (
                 <button
                   key={tab}
@@ -164,13 +164,13 @@ export function HeroPreview() {
                           : "border-line bg-white",
                       )}
                     >
-                      <div className="text-[9px] font-semibold text-muted">
+                      <div className="text-[10px] font-semibold text-muted">
                         {metric.k}
                       </div>
                       <div className="mt-2 text-lg font-bold tracking-[-.04em] sm:text-xl">
                         {metric.v}
                       </div>
-                      <div className="mt-1 text-[9px] text-muted">
+                      <div className="mt-1 text-[10px] text-muted">
                         {metric.d}
                       </div>
                     </div>
@@ -181,7 +181,7 @@ export function HeroPreview() {
                     <div className="flex items-center justify-between">
                       <div className="min-w-0">
                         <h3 className="text-xs font-bold">Inventory flow</h3>
-                        <p className="mt-1 text-[9px] text-muted">
+                        <p className="mt-1 text-[10px] text-muted">
                           Units moved · last 7 days
                         </p>
                       </div>
@@ -203,7 +203,7 @@ export function HeroPreview() {
                         ),
                       )}
                     </div>
-                    <div className="mt-2 flex justify-between font-mono text-[8px] text-muted">
+                    <div className="mt-2 flex justify-between font-mono text-[10px] text-muted">
                       <span>29 AUG</span>
                       <span>04 SEP</span>
                     </div>
@@ -212,7 +212,7 @@ export function HeroPreview() {
                     <div className="flex items-center gap-2">
                       <CircleAlert className="text-accent" size={14} />
                       <h3 className="text-xs font-bold">Attention queue</h3>
-                      <span className="ml-auto rounded-full bg-white/10 px-2 py-1 font-mono text-[8px]">
+                      <span className="ml-auto rounded-full bg-white/10 px-2 py-1 font-mono text-[10px]">
                         12 open
                       </span>
                     </div>
@@ -224,7 +224,7 @@ export function HeroPreview() {
                       ].map((item, index) => (
                         <div
                           key={item}
-                          className="flex items-center gap-2 rounded-lg bg-white/[.06] p-2.5 text-[9px]"
+                          className="flex items-center gap-2 rounded-lg bg-white/[.06] p-2.5 text-[10px]"
                         >
                           <span
                             className={cn(
@@ -245,7 +245,7 @@ export function HeroPreview() {
                 <div className="mt-3 rounded-xl border border-line bg-white p-4">
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-xs font-bold">Recent stock movement</h3>
-                    <button className="text-[9px] font-bold underline underline-offset-4">
+                    <button className="text-[10px] font-bold underline underline-offset-4">
                       View ledger
                     </button>
                   </div>
@@ -263,12 +263,12 @@ export function HeroPreview() {
                         <Icon size={12} />
                       </span>
                       <div>
-                        <div className="text-[10px] font-semibold">{title}</div>
-                        <div className="mt-0.5 truncate text-[8px] text-muted">
+                        <div className="text-xs font-semibold">{title}</div>
+                        <div className="mt-0.5 truncate text-[10px] text-muted">
                           {ref}
                         </div>
                       </div>
-                      <div className="font-mono text-[10px] font-medium">
+                      <div className="font-mono text-xs font-medium">
                         {value}
                       </div>
                     </div>
@@ -281,7 +281,7 @@ export function HeroPreview() {
       </div>
       <div className="absolute -right-3 top-32 hidden rounded-xl border border-white/70 bg-white/90 p-3 shadow-xl backdrop-blur lg:block">
         <Box size={15} />
-        <div className="mt-5 font-mono text-[9px] text-muted">LIVE STOCK</div>
+        <div className="mt-5 font-mono text-[10px] text-muted">LIVE STOCK</div>
         <div className="mt-1 text-lg font-bold">48,290</div>
       </div>
     </motion.div>

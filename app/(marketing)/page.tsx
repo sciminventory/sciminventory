@@ -21,7 +21,7 @@ export default function Home() {
         <div className="grid-fade pointer-events-none absolute inset-0" />
         <div className="pointer-events-none absolute left-1/2 top-0 h-[540px] w-[760px] -translate-x-1/2 rounded-full bg-accent/20 blur-[110px]" />
         <div className="shell relative text-center">
-          <div className="mx-auto inline-flex max-w-full items-center gap-2 rounded-full border border-ink/10 bg-white/70 px-3 py-1.5 font-mono text-[9px] font-medium uppercase tracking-[.07em] shadow-sm backdrop-blur sm:tracking-[.09em]">
+          <div className="mx-auto inline-flex max-w-full items-center gap-2 rounded-full border border-ink/10 bg-white/70 px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-[.07em] shadow-sm backdrop-blur sm:tracking-[.09em]">
             <span className="size-1.5 rounded-full bg-accent ring-4 ring-accent/20" />{" "}
             Built for real operational work <ArrowUpRight size={11} />
           </div>
@@ -44,7 +44,7 @@ export default function Home() {
           </div>
           <a
             href="#product"
-            className="mx-auto mt-14 flex w-fit items-center gap-2 text-[11px] font-semibold text-muted"
+            className="mx-auto mt-14 flex w-fit items-center gap-2 text-sm font-semibold text-muted"
           >
             <ArrowDown size={13} /> Explore the platform
           </a>

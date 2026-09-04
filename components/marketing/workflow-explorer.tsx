@@ -84,7 +84,7 @@ export function WorkflowExplorer() {
             key={item.name}
             onClick={() => setActive(index)}
             className={cn(
-              "relative min-w-max px-4 py-5 text-xs font-semibold text-white/45 transition-colors hover:text-white lg:flex-1",
+              "relative min-w-max px-4 py-5 text-sm font-semibold text-white/45 transition-colors hover:text-white lg:flex-1",
               active === index && "text-white",
             )}
           >
@@ -114,7 +114,7 @@ export function WorkflowExplorer() {
               <h3 className="mt-5 text-3xl font-bold tracking-[-.05em] lg:text-4xl">
                 Every handoff stays visible.
               </h3>
-              <p className="mt-5 max-w-md text-sm leading-7 text-white/55">
+              <p className="mt-5 max-w-md text-base leading-7 text-white/60">
                 Move work forward without losing the commercial, physical, or
                 audit context behind it. Each stage keeps its source, owner,
                 status, and next action attached.
@@ -148,14 +148,14 @@ export function WorkflowExplorer() {
             >
               <div className="flex items-center justify-between">
                 <span className="eyebrow text-muted">{stage.label}</span>
-                <span className="rounded-full bg-blue-50 px-2.5 py-1 font-mono text-[9px] font-medium text-blue-800">
+                <span className="rounded-full bg-blue-50 px-2.5 py-1 font-mono text-xs font-medium text-blue-800">
                   IN PROGRESS
                 </span>
               </div>
               <h4 className="mt-6 text-xl font-bold tracking-[-.04em]">
                 {stage.title}
               </h4>
-              <p className="mt-1.5 text-xs text-muted">{stage.meta}</p>
+              <p className="mt-1.5 text-sm text-muted">{stage.meta}</p>
               <div className="mt-7 h-1.5 overflow-hidden rounded-full bg-mist">
                 <motion.div
                   initial={{ width: 0 }}
@@ -163,7 +163,7 @@ export function WorkflowExplorer() {
                   className="h-full rounded-full bg-ink"
                 />
               </div>
-              <div className="mt-2 flex justify-between font-mono text-[8px] text-muted">
+              <div className="mt-2 flex justify-between font-mono text-xs text-muted">
                 <span>WORKFLOW PROGRESS</span>
                 <span>{stage.progress}%</span>
               </div>
@@ -177,7 +177,7 @@ export function WorkflowExplorer() {
                 ].map((item, index) => (
                   <div
                     key={item}
-                    className="flex items-center gap-3 rounded-lg bg-mist p-3 text-[11px] font-semibold"
+                    className="flex items-center gap-3 rounded-lg bg-mist p-3 text-sm font-semibold"
                   >
                     <span
                       className={cn(
@@ -197,7 +197,7 @@ export function WorkflowExplorer() {
                   </div>
                 ))}
               </div>
-              <button className="mt-5 flex w-full items-center justify-between rounded-xl bg-accent px-4 py-3 text-xs font-bold text-white">
+              <button className="mt-5 flex w-full items-center justify-between rounded-xl bg-accent px-4 py-3 text-sm font-bold text-white">
                 {stage.action}
                 <ArrowRight size={14} />
               </button>

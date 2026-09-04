@@ -42,7 +42,7 @@ export function Footer() {
                       <a
                         key={link}
                         href={link === "Careers" ? "/careers" : "#"}
-                        className="block text-xs text-white/65 transition-colors hover:text-white"
+                        className="block text-sm text-white/65 transition-colors hover:text-white"
                       >
                         {link}
                       </a>
@@ -53,7 +53,7 @@ export function Footer() {
             </div>
           </ScrollReveal>
         </div>
-        <div className="mt-16 flex flex-col justify-between gap-3 border-t border-white/10 pt-6 font-mono text-[9px] text-white/35 sm:flex-row">
+        <div className="mt-16 flex flex-col justify-between gap-3 border-t border-white/10 pt-6 font-mono text-xs text-white/35 sm:flex-row">
           <span>© 2026 PRIORITY HANDLING LOGISTICS, INC.</span>
           <span>OPERATIONAL CLARITY · BUILT IN</span>
         </div>

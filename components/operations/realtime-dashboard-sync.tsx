@@ -43,5 +43,5 @@ export function RealtimeDashboardSync({ organizationId }: { organizationId: stri
     };
   }, [organizationId, router]);
 
-  return <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 font-mono text-[9px] font-medium text-emerald-700"><i className="size-2 animate-pulse rounded-full bg-emerald-500" /> LIVE</span>;
+  return <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 font-mono text-xs font-medium text-emerald-700"><i className="size-2 animate-pulse rounded-full bg-emerald-500" /> LIVE</span>;
 }

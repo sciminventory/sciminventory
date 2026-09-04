@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { hasPermission, type AppPermission } from "@/lib/auth/permissions";
 import { requireMfaSession } from "@/lib/auth/require-mfa";
+import { validateResumeFile } from "@/lib/recruitment/resume-files";
 import type { Json } from "@/types/database";
 
 const organizationIdSchema = z.uuid();
@@ -111,26 +112,33 @@ export async function createApplicant(formData: FormData) {
   if (!result.success) go("applicants", result.error.issues[0]?.message ?? "Check the applicant details.", "error");
   const data = result.data;
   const { supabase, user } = await requireRecruitment(data.organizationId, "applicants", "recruitment.applicants.manage");
+  const file = formData.get("resumeFile");
+  const resumeFile = file instanceof File && file.size > 0 ? file : null;
+  const resumeValidation = resumeFile ? await validateResumeFile(resumeFile) : null;
+  if (resumeValidation && !resumeValidation.ok) go("applicants", resumeValidation.message, "error");
+
   let applicantId: string;
+  let createdApplicant = false;
   const existing = await supabase.from("applicants").select("id").eq("organization_id", data.organizationId).eq("email", data.email).maybeSingle();
   if (existing.data) applicantId = existing.data.id;
   else {
     const inserted = await supabase.from("applicants").insert({ organization_id: data.organizationId, full_name: data.fullName, email: data.email, phone: data.phone || null, location: data.location || null, source: data.source, created_by: user.id }).select("id").single();
     if (inserted.error || !inserted.data) go("applicants", inserted.error?.message ?? "Applicant could not be created.", "error");
     applicantId = inserted.data.id;
+    createdApplicant = true;
   }
 
   const applicationId = crypto.randomUUID();
   let resumePath: string | null = null;
   let resumeName: string | null = null;
-  const file = formData.get("resumeFile");
-  if (file instanceof File && file.size > 0) {
-    if (file.size > 10 * 1024 * 1024) go("applicants", "Résumé files must be 10 MB or smaller.", "error");
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-120);
-    resumePath = `${data.organizationId}/applications/${applicationId}/${crypto.randomUUID()}-${safeName}`;
-    const upload = await supabase.storage.from("recruitment-documents").upload(resumePath, file, { contentType: file.type || "application/octet-stream" });
-    if (upload.error) go("applicants", upload.error.message, "error");
-    resumeName = file.name;
+  if (resumeFile && resumeValidation?.ok) {
+    resumePath = `${data.organizationId}/applications/${applicationId}/${crypto.randomUUID()}-${resumeValidation.safeName}`;
+    const upload = await supabase.storage.from("recruitment-documents").upload(resumePath, resumeFile, { contentType: resumeValidation.contentType });
+    if (upload.error) {
+      if (createdApplicant) await supabase.from("applicants").delete().eq("id", applicantId);
+      go("applicants", upload.error.message, "error");
+    }
+    resumeName = resumeFile.name;
   }
   const application = await supabase.from("job_applications").insert({
     id: applicationId,
@@ -145,7 +153,11 @@ export async function createApplicant(formData: FormData) {
     declared_skills: skills(data.declaredSkills),
     screening_consent_at: new Date().toISOString(),
   });
-  if (application.error) go("applicants", application.error.message, "error");
+  if (application.error) {
+    if (resumePath) await supabase.storage.from("recruitment-documents").remove([resumePath]);
+    if (createdApplicant) await supabase.from("applicants").delete().eq("id", applicantId);
+    go("applicants", application.error.message, "error");
+  }
   refreshRecruitment();
   go("applicants", "Applicant and application created.");
 }
@@ -162,7 +174,7 @@ export async function updateApplicationStage(formData: FormData) {
 
 export async function downloadRecruitmentResume(formData: FormData) {
   const result = z.object({ organizationId: z.uuid(), applicationId: z.uuid() }).safeParse(Object.fromEntries(formData));
-  if (!result.success) go("applicants", "Invalid résumé reference.", "error");
+  if (!result.success) go("applicants", "Invalid resume reference.", "error");
   const { supabase } = await requireRecruitment(result.data.organizationId, "applicants", "recruitment.read");
   const { data: application, error } = await supabase
     .from("job_applications")
@@ -170,7 +182,7 @@ export async function downloadRecruitmentResume(formData: FormData) {
     .eq("organization_id", result.data.organizationId)
     .eq("id", result.data.applicationId)
     .single();
-  if (error || !application?.resume_storage_path) go("applicants", error?.message ?? "This application has no uploaded résumé.", "error");
+  if (error || !application?.resume_storage_path) go("applicants", error?.message ?? "This application has no uploaded resume.", "error");
   const signed = await supabase.storage.from("recruitment-documents").createSignedUrl(application.resume_storage_path, 60);
   if (signed.error) go("applicants", signed.error.message, "error");
   redirect(signed.data.signedUrl);

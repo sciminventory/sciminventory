@@ -177,7 +177,7 @@ def rank_applicants(request: RankRequest, _: Annotated[None, Depends(verify_serv
                 matched_skills=sorted(set(matched_required + matched_preferred)),
                 missing_skills=missing_required,
                 explanation={
-                    "semantic": "Similarity between the job description and résumé content.",
+                    "semantic": "Similarity between the job description and resume content.",
                     "skills": f"Matched {len(matched_required)} of {len(required)} required skills.",
                     "experience": f"Candidate reports {application.years_experience:g} years; role requires {request.job.min_years_experience:g}.",
                     "education": f"Candidate level: {application.education_level}; requested level: {request.job.education_level}.",

@@ -10,7 +10,7 @@ A multi-tenant operations platform for inventory, procurement, logistics, and re
 - Organization membership, roles, warehouse assignment, audit, RLS, and private Storage foundation.
 - Owner administration for organization settings, invitations, roles, membership status, warehouses, assignments, and audit history.
 - Live operational modules for products, balances, immutable stock movements, transfers, cycle counts, warehouse tasks and locations, suppliers, procurement records, shipments, and private documents.
-- Recruitment modules for job openings, consented applicant profiles, private résumé storage, a stage-based hiring pipeline, and auditable screening runs.
+- Recruitment modules for job openings, consented applicant profiles, private resume storage, a stage-based hiring pipeline, and auditable screening runs.
 - Public careers pages for browsing open positions and submitting protected, rate-limited applications with a confirmation reference.
 - Identity-blind applicant ranking using TF-IDF similarity plus explicit skill, experience, and education signals. Ranking supports human review and never makes the hiring decision.
 - Tenant-scoped server mutations, role-based RLS, automatic operational audit events, and negative-stock protection.

@@ -72,13 +72,13 @@ export function CapabilitySection() {
             <ScrollReveal key={n} delay={Number(n) * 0.045} className="h-full">
               <article className="group min-h-72 border-b border-r border-line p-6 transition-colors hover:bg-mist/70">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] text-muted">{n}</span>
+                  <span className="font-mono text-sm text-muted">{n}</span>
                   <Icon size={20} strokeWidth={1.7} />
                 </div>
                 <h3 className="mt-20 text-xl font-bold tracking-[-.04em]">
                   {title}
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-muted">{body}</p>
+                <p className="mt-3 text-base leading-7 text-muted">{body}</p>
               </article>
             </ScrollReveal>
           ))}
@@ -158,7 +158,7 @@ function WarehouseMap() {
             <p className="eyebrow text-accent">Manila Central</p>
             <h3 className="mt-2 text-lg font-bold">ZONE-A · Storage map</h3>
           </div>
-          <span className="rounded-full bg-white/10 px-3 py-1.5 font-mono text-[9px]">
+          <span className="rounded-full bg-white/10 px-3 py-1.5 font-mono text-xs">
             92% UTILIZED
           </span>
         </div>
@@ -168,7 +168,7 @@ function WarehouseMap() {
               key={i}
               className={`group relative aspect-square rounded-lg border p-2 transition-transform hover:-translate-y-1 ${[5, 11, 19].includes(i) ? "border-amber-300/40 bg-amber-300/20" : "border-white/10 bg-white/[.06]"}`}
             >
-              <span className="font-mono text-[8px] text-white/45">
+              <span className="font-mono text-xs text-white/45">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <span
@@ -177,7 +177,7 @@ function WarehouseMap() {
             </div>
           ))}
         </div>
-        <div className="mt-7 flex flex-wrap gap-5 border-t border-white/10 pt-5 text-[10px] text-white/55">
+        <div className="mt-7 flex flex-wrap gap-5 border-t border-white/10 pt-5 text-sm text-white/55">
           <span className="flex items-center gap-2">
             <i className="size-2 rounded-full bg-accent" />
             Available capacity
@@ -237,7 +237,7 @@ export function TrustSection() {
                 <div key={t} className="bg-paper p-6">
                   <Icon size={20} />
                   <h3 className="mt-8 font-bold">{t}</h3>
-                  <p className="mt-2 text-sm leading-6 text-muted">{b}</p>
+                  <p className="mt-2 text-base leading-7 text-muted">{b}</p>
                 </div>
               ))}
             </div>

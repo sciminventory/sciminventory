@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
+import { validateResumeFile } from "@/lib/recruitment/resume-files";
 
 export type PublicApplicationState = {
   status: "idle" | "error" | "success";
@@ -27,12 +28,6 @@ const applicationSchema = z.object({
   consent: z.literal("on"),
   website: z.string().max(0),
 });
-
-const allowedFiles: Record<string, string> = {
-  ".pdf": "application/pdf",
-  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ".txt": "text/plain",
-};
 
 export async function submitPublicApplication(
   _previousState: PublicApplicationState,
@@ -126,18 +121,16 @@ export async function submitPublicApplication(
   let resumeName: string | null = null;
   const file = formData.get("resumeFile");
   if (file instanceof File && file.size > 0) {
-    const extension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
-    const contentType = allowedFiles[extension];
-    if (!contentType || file.size > 10 * 1024 * 1024) {
+    const validation = await validateResumeFile(file);
+    if (!validation.ok) {
       if (createdApplicant) await admin.from("applicants").delete().eq("id", applicantId);
-      return { status: "error", message: "Upload a PDF, DOCX, or TXT résumé no larger than 10 MB." };
+      return { status: "error", message: validation.message };
     }
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-120);
-    resumePath = `${data.organizationId}/applications/${applicationId}/${randomUUID()}-${safeName}`;
-    const upload = await admin.storage.from("recruitment-documents").upload(resumePath, file, { contentType, upsert: false });
+    resumePath = `${data.organizationId}/applications/${applicationId}/${randomUUID()}-${validation.safeName}`;
+    const upload = await admin.storage.from("recruitment-documents").upload(resumePath, file, { contentType: validation.contentType, upsert: false });
     if (upload.error) {
       if (createdApplicant) await admin.from("applicants").delete().eq("id", applicantId);
-      return { status: "error", message: "The résumé file could not be uploaded. Please try again." };
+      return { status: "error", message: "The resume file could not be uploaded. Please try again." };
     }
     resumeName = file.name;
   }
