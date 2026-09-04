@@ -21,10 +21,10 @@ export function RecoveryCard({ mode, message, action }: RecoveryCardProps) {
 
   return (
     <main className="grid min-h-screen w-full grid-cols-1 overflow-x-hidden bg-white lg:grid-cols-[minmax(0,1.15fr)_minmax(460px,.85fr)]">
-      <AuthVisual />
+      <AuthVisual showLogo={!resetting} />
       <section className="relative flex min-h-screen min-w-0 flex-col bg-white px-6 py-6 sm:px-10 lg:px-14 xl:px-20">
         <div className="flex items-center justify-between">
-          <BrandMark className="lg:hidden" />
+          {!resetting && <BrandMark className="lg:hidden" />}
           <Link
             href="/login"
             className="ml-auto inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-muted transition hover:bg-mist hover:text-ink"
