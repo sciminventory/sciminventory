@@ -20,6 +20,7 @@ import { AdminActionButton } from "@/components/operations/admin-action-button";
 import { ScrollReveal } from "@/components/motion/scroll-motion";
 import { createOperationalItem, downloadDocument, updateOperationalStatus } from "@/app/(app)/dashboard/[...segments]/actions";
 import { modulePaths, type ModuleConfig } from "@/lib/operations/modules";
+import { formatPhpCurrency } from "@/lib/utils";
 
 export type OperationalItem = {
   id: string;
@@ -112,7 +113,7 @@ export function ModulePage({ config, ...props }: Props) {
       <div className="grid overflow-hidden rounded-2xl border border-line bg-white shadow-[0_14px_40px_rgba(25,72,133,.055)] sm:grid-cols-3">
         <Metric label="Total records" value={props.items.length.toLocaleString()} detail={`All ${config.title.toLowerCase()}`} />
         <Metric label="Active workflow" value={active.toLocaleString()} detail="Open or actionable" />
-        <Metric label={config.quantityLabel ?? "Completed"} value={config.quantityLabel ? formatNumber(totalQuantity) : completed.toLocaleString()} detail={config.quantityLabel ? "Across visible records" : "Completed records"} />
+        <Metric label={config.quantityLabel ?? "Completed"} value={config.quantityLabel ? formatOperationalValue(totalQuantity, config) : completed.toLocaleString()} detail={config.quantityLabel ? "Across visible records" : "Completed records"} />
       </div>
       </ScrollReveal>
 
@@ -142,7 +143,7 @@ export function ModulePage({ config, ...props }: Props) {
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[820px] text-left">
               <thead className="border-b border-line bg-[#f8faff] font-mono text-xs uppercase tracking-wider text-muted">
-                <tr><th className="px-5 py-3 font-medium">Reference</th><th className="px-5 py-3 font-medium">Record</th><th className="px-5 py-3 font-medium">Warehouse / context</th><th className="px-5 py-3 font-medium">Quantity</th><th className="px-5 py-3 font-medium">Created / due</th><th className="px-5 py-3 font-medium">Status / action</th></tr>
+                <tr><th className="px-5 py-3 font-medium">Reference</th><th className="px-5 py-3 font-medium">Record</th><th className="px-5 py-3 font-medium">Warehouse / context</th><th className="px-5 py-3 font-medium">{config.quantityLabel ?? "Quantity"}</th><th className="px-5 py-3 font-medium">Created / due</th><th className="px-5 py-3 font-medium">Status / action</th></tr>
               </thead>
               <tbody>
                 {filtered.map((item) => <ItemRow key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} />)}
@@ -235,7 +236,7 @@ function ItemCard({ item, config, organizationId, canManage }: { item: Operation
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-mist p-3 text-sm">
         <div><dt className="text-muted">Warehouse / context</dt><dd className="mt-1 break-words font-semibold">{item.warehouse ?? "Organization-wide"}</dd></div>
-        <div><dt className="text-muted">Quantity</dt><dd className="mt-1 font-mono font-semibold">{item.quantity === null ? "—" : formatNumber(item.quantity)}</dd></div>
+        <div><dt className="text-muted">{config.quantityLabel ?? "Quantity"}</dt><dd className="mt-1 font-mono font-semibold">{item.quantity === null ? "—" : formatOperationalValue(item.quantity, config)}</dd></div>
         <div><dt className="text-muted">Created</dt><dd className="mt-1 font-mono font-semibold">{formatDate(item.createdAt)}</dd></div>
         <div><dt className="text-muted">Due</dt><dd className="mt-1 font-mono font-semibold">{item.dueAt ? formatDate(item.dueAt) : "Not set"}</dd></div>
       </dl>
@@ -250,7 +251,7 @@ function ItemRow({ item, config, organizationId, canManage }: { item: Operationa
       <td className="px-5 py-4 font-mono font-medium text-blue-700">{item.reference}</td>
       <td className="max-w-xs px-5 py-4"><p className="font-bold">{item.title}</p><p className="mt-1 truncate text-xs text-muted">{item.detail || "No additional details"}</p></td>
       <td className="px-5 py-4 text-sm text-muted">{item.warehouse ?? "Organization-wide"}</td>
-      <td className="px-5 py-4 font-mono">{item.quantity === null ? "—" : formatNumber(item.quantity)}</td>
+      <td className="px-5 py-4 font-mono">{item.quantity === null ? "—" : formatOperationalValue(item.quantity, config)}</td>
       <td className="px-5 py-4"><p className="font-mono text-xs">{formatDate(item.createdAt)}</p>{item.dueAt && <p className="mt-1 text-xs text-muted">Due {formatDate(item.dueAt)}</p>}</td>
       <td className="px-5 py-3">
         <ItemActions item={item} config={config} organizationId={organizationId} canManage={canManage} />
@@ -280,5 +281,7 @@ function Metric({ label, value, detail }: { label: string; value: string; detail
 function StatusBadge({ status }: { status: string }) { const danger = ["cancelled", "rejected", "exception", "inactive"].includes(status); const done = ["completed", "delivered", "verified", "active"].includes(status); return <span className={`rounded-full px-2 py-1 font-mono text-xs ${danger ? "bg-red-50 text-red-700" : done ? "bg-blue-50 text-blue-700" : "bg-amber-50 text-amber-800"}`}>{humanize(status).toUpperCase()}</span>; }
 function humanize(value: string) { return value.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase()); }
 function formatNumber(value: number) { return new Intl.NumberFormat("en", { maximumFractionDigits: 4 }).format(value); }
+function formatOperationalValue(value: number, config: ModuleConfig) { return isProcurement(config) ? formatPhpCurrency(value) : formatNumber(value); }
+function isProcurement(config: ModuleConfig) { return ["requisitions", "rfqs", "quotations", "purchase_orders"].includes(config.key); }
 function formatDate(value: string) { return new Intl.DateTimeFormat("en", { month: "short", day: "2-digit", year: "numeric" }).format(new Date(value)); }
 function referencePlaceholder(key: string) { const prefixes: Record<string, string> = { products: "SKU-001", suppliers: "SUP-001", locations: "A-01-01", movements: "GRN-0001", transfers: "TR-0001", cycle_counts: "CC-0001", receiving: "RCV-0001", putaway: "PUT-0001", picking: "PICK-0001", requisitions: "PR-0001", rfqs: "RFQ-0001", quotations: "QT-0001", purchase_orders: "PO-0001", logistics: "SHP-0001", documents: "DOC-0001" }; return prefixes[key] ?? "REF-0001"; }

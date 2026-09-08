@@ -52,7 +52,7 @@ export function emptyDashboardData(setupError?: string): DashboardData {
     metrics: [
       metric("Active products", "0", "Live", "neutral", "No products yet", "products"),
       metric("Stock on hand", "0", "Live", "neutral", "Across active warehouses", "stock"),
-      metric("Open purchase orders", "0", "$0 committed", "neutral", "Approved or sent", "orders"),
+      metric("Open purchase orders", "0", "₱0 committed", "neutral", "Approved or sent", "orders"),
       metric("Inbound work", "0", "0 units", "neutral", "Open receiving tasks", "inbound"),
     ],
     throughput: { "7D": Array(7).fill(0), "30D": Array(15).fill(0), "90D": Array(18).fill(0) },

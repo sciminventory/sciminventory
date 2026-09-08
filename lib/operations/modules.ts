@@ -208,7 +208,7 @@ function procurementConfig(
     createLabel: `Create ${singular.toLowerCase()}`,
     needsWarehouse: true,
     needsSupplier: key !== "requisitions",
-    quantityLabel: "Amount",
+    quantityLabel: "Amount (₱)",
     detailLabel: "Notes",
   };
 }

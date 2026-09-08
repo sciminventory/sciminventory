@@ -75,7 +75,7 @@ const navigation = [
       { label: "AI screening", href: "/dashboard/recruitment/screening" },
     ],
   },
-  { label: "Suppliers", icon: Users, href: modulePaths.suppliers },
+  { label: "Vendors", icon: Users, href: "/dashboard/vendors" },
   { label: "Logistics", icon: Truck, href: modulePaths.logistics },
   { label: "Documents", icon: FileText, href: modulePaths.documents },
 ] as const;
@@ -103,7 +103,8 @@ export function OperationsShell({
   const visibleNavigation = navigation.filter((item) => {
     if (item.label === "Recruitment") return recruitmentAccess;
     if (item.label === "Inventory" || item.label === "Warehouse") return canViewOperationalModule("stock", effectiveRole);
-    if (item.label === "Procurement" || item.label === "Suppliers") return canViewOperationalModule("suppliers", effectiveRole);
+    if (item.label === "Procurement") return canViewOperationalModule("suppliers", effectiveRole);
+    if (item.label === "Vendors") return hasPermission(effectiveRole, "vendors.read");
     if (item.label === "Logistics") return canViewOperationalModule("logistics", effectiveRole);
     if (item.label === "Documents") return canViewOperationalModule("documents", effectiveRole);
     return true;

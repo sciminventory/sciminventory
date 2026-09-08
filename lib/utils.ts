@@ -11,3 +11,12 @@ export function formatCompactNumber(value: number) {
     maximumFractionDigits: 1,
   }).format(value);
 }
+
+export function formatPhpCurrency(value: number) {
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    notation: Math.abs(value) >= 100_000 ? "compact" : "standard",
+    maximumFractionDigits: Math.abs(value) >= 100_000 ? 1 : 0,
+  }).format(value);
+}

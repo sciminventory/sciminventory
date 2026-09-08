@@ -1,4 +1,6 @@
 .next/
+.next-build/
+.next-webpack/
 node_modules/
 .env
 .env.local

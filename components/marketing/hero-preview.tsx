@@ -150,7 +150,7 @@ export function HeroPreview() {
               >
                 <div className="mt-5 grid grid-cols-2 gap-2 lg:grid-cols-4">
                   {[
-                    { k: "Inventory value", v: "$2.48M", d: "Across 3 sites" },
+                    { k: "Inventory value", v: "₱2.48M", d: "Across 3 sites" },
                     { k: "Available units", v: "48,290", d: "92.4% healthy" },
                     { k: "Inbound", v: "1,840", d: "6 shipments" },
                     { k: "Needs action", v: "12", d: "3 critical" },

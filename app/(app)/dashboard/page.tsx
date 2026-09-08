@@ -3,6 +3,7 @@ import { DashboardContent } from "@/components/operations/dashboard-content";
 import { emptyDashboardData, type DashboardData, type DashboardMetric } from "@/lib/operations/dashboard-data";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { formatPhpCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Control tower" };
 
@@ -98,7 +99,7 @@ export default async function DashboardPage() {
   const metrics: DashboardMetric[] = [
     makeMetric("Active products", formatInteger(activeProducts.length), `${health.healthy} healthy`, "positive", `${health.low + health.critical} need attention`, "products", throughput["30D"]),
     makeMetric("Stock on hand", formatQuantity(stockOnHand), `${formatQuantity(stockOnHand - balances.reduce((sum, balance) => sum + Number(balance.reserved), 0))} available`, "positive", `Across ${warehouses.size} warehouses`, "stock", throughput["30D"]),
-    makeMetric("Open purchase orders", formatInteger(openPurchaseOrders.length), formatCurrency(committed), openPurchaseOrders.length ? "attention" : "neutral", "Committed value", "orders", purchaseOrders.slice(0, 6).reverse().map((order) => Number(order.amount ?? 0))),
+    makeMetric("Open purchase orders", formatInteger(openPurchaseOrders.length), formatPhpCurrency(committed), openPurchaseOrders.length ? "attention" : "neutral", "Committed value", "orders", purchaseOrders.slice(0, 6).reverse().map((order) => Number(order.amount ?? 0))),
     makeMetric("Inbound work", formatInteger(inboundTasks.length), `${formatQuantity(inboundUnits)} units`, inboundTasks.length ? "attention" : "neutral", "Open receiving tasks", "inbound", inboundTasks.slice(0, 6).reverse().map((task) => Number(task.quantity ?? 0))),
   ];
 
@@ -115,7 +116,7 @@ export default async function DashboardPage() {
       { label: "Requisitions", amount: procurement.filter((record) => record.record_type === "requisition").reduce((sum, record) => sum + Number(record.amount ?? 0), 0) },
     ],
     alerts: alerts.slice(0, 3),
-    inbound: openPurchaseOrders.slice(0, 5).map((record) => ({ reference: record.reference, title: record.supplier_id ? suppliers.get(record.supplier_id) ?? record.title : record.title, expected: record.due_at ? formatDate(record.due_at) : "Not scheduled", value: formatCurrency(Number(record.amount ?? 0), record.currency), status: record.status })),
+    inbound: openPurchaseOrders.slice(0, 5).map((record) => ({ reference: record.reference, title: record.supplier_id ? suppliers.get(record.supplier_id) ?? record.title : record.title, expected: record.due_at ? formatDate(record.due_at) : "Not scheduled", value: formatPhpCurrency(Number(record.amount ?? 0)), status: record.status })),
     recentMovements: movements.slice(0, 5).map((movement) => ({ type: movement.movement_type, reference: movement.reference, quantity: Number(movement.quantity) })),
     inventoryHealth: health,
     approvals: { total: requisitionsWaiting + ordersWaiting, requisitions: requisitionsWaiting, purchaseOrders: ordersWaiting },
@@ -158,5 +159,4 @@ function normalizeBars(values: number[]) {
 
 function formatInteger(value: number) { return new Intl.NumberFormat("en", { maximumFractionDigits: 0 }).format(value); }
 function formatQuantity(value: number) { return new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(value); }
-function formatCurrency(value: number, currency = "USD") { return new Intl.NumberFormat("en", { style: "currency", currency, notation: value >= 100_000 ? "compact" : "standard", maximumFractionDigits: value >= 100_000 ? 1 : 0 }).format(value); }
 function formatDate(value: string) { return new Intl.DateTimeFormat("en", { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); }

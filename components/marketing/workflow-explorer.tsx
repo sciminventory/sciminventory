@@ -26,7 +26,7 @@ const stages = [
     name: "Purchase",
     label: "PO-2026-0941",
     title: "Apex Industrial Supply",
-    meta: "$28,640 · confirmed",
+    meta: "₱28,640 · confirmed",
     progress: 48,
     action: "Open purchase order",
   },

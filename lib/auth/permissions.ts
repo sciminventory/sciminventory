@@ -16,6 +16,8 @@ export type AppPermission =
   | "procurement.manage"
   | "logistics.manage"
   | "documents.manage"
+  | "vendors.read"
+  | "vendors.manage"
   | "recruitment.read"
   | "recruitment.jobs.manage"
   | "recruitment.applicants.manage"
@@ -25,6 +27,7 @@ export type AppPermission =
 const allPermissions: AppPermission[] = [
   "organization.manage", "members.manage", "warehouses.manage", "inventory.manage",
   "product_master.manage", "procurement.manage", "logistics.manage", "documents.manage",
+  "vendors.read", "vendors.manage",
   "operations.read", "procurement.read", "logistics.read", "documents.read",
   "recruitment.read", "recruitment.jobs.manage", "recruitment.applicants.manage",
   "recruitment.pipeline.manage", "recruitment.screening.run",
@@ -33,11 +36,11 @@ const allPermissions: AppPermission[] = [
 const rolePermissions: Record<OrganizationRole, readonly AppPermission[]> = {
   owner: allPermissions,
   admin: allPermissions.filter((permission) => permission !== "organization.manage" && permission !== "members.manage"),
-  procurement_manager: ["operations.read", "procurement.read", "logistics.read", "documents.read", "product_master.manage", "procurement.manage", "logistics.manage"],
-  buyer: ["operations.read", "procurement.read", "logistics.read", "documents.read", "product_master.manage", "procurement.manage", "logistics.manage"],
-  warehouse_manager: ["operations.read", "logistics.read", "documents.read", "warehouses.manage", "inventory.manage", "product_master.manage", "logistics.manage"],
+  procurement_manager: ["operations.read", "procurement.read", "logistics.read", "documents.read", "vendors.read", "vendors.manage", "product_master.manage", "procurement.manage", "logistics.manage"],
+  buyer: ["operations.read", "procurement.read", "logistics.read", "documents.read", "vendors.read", "vendors.manage", "product_master.manage", "procurement.manage", "logistics.manage"],
+  warehouse_manager: ["operations.read", "logistics.read", "documents.read", "vendors.read", "warehouses.manage", "inventory.manage", "product_master.manage", "logistics.manage"],
   operator: ["operations.read", "documents.read", "inventory.manage"],
-  viewer: ["operations.read", "procurement.read", "logistics.read", "documents.read"],
+  viewer: ["operations.read", "procurement.read", "logistics.read", "documents.read", "vendors.read"],
   hr_manager: ["recruitment.read", "recruitment.jobs.manage", "recruitment.applicants.manage", "recruitment.pipeline.manage", "recruitment.screening.run"],
   recruiter: ["recruitment.read", "recruitment.applicants.manage", "recruitment.pipeline.manage", "recruitment.screening.run"],
 };

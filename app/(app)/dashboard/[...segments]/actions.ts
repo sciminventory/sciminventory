@@ -191,6 +191,7 @@ export async function createOperationalItem(formData: FormData) {
       warehouse_id: warehouseId,
       status: data.status || "draft",
       amount: quantity,
+      currency: "PHP",
       due_at: dueAt,
       notes: data.detail || null,
       created_by: user.id,

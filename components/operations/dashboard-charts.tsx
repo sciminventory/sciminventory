@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import type { DashboardData } from "@/lib/operations/dashboard-data";
+import { formatPhpCurrency } from "@/lib/utils";
 
 type Range = keyof DashboardData["throughput"];
 
@@ -114,11 +115,10 @@ function ProcurementSpendChart({ spend }: { spend: DashboardData["spend"] }) {
     <section className="rounded-2xl border border-line bg-white p-5 shadow-[0_18px_55px_rgba(25,72,133,.07)] sm:p-6">
       <div className="flex items-start justify-between"><div><p className="font-mono text-xs uppercase tracking-[.12em] text-muted">Committed spend</p><h2 className="mt-2 text-base font-bold">By category</h2></div><span className="rounded-lg bg-blue-50 px-2 py-1 font-mono text-xs text-blue-700">SEP</span></div>
       <div className="mt-5 space-y-4">
-        {spend.map((row, index) => <div key={row.label}><div className="mb-2 flex justify-between text-sm"><span className="font-semibold">{row.label}</span><span className="font-mono text-muted">{formatCurrency(row.amount)}</span></div><div className="h-2 overflow-hidden rounded-full bg-blue-50"><motion.div className="h-full rounded-full bg-gradient-to-r from-blue-700 to-blue-400" initial={{ width: 0 }} whileInView={{ width: `${row.amount === 0 ? 0 : Math.max(8, (row.amount / maxAmount) * 100)}%` }} viewport={{ once: false }} transition={{ duration: reduceMotion ? 0 : .8, delay: index * .12, ease: [0.22, 1, 0.36, 1] }} /></div></div>)}
+        {spend.map((row, index) => <div key={row.label}><div className="mb-2 flex justify-between text-sm"><span className="font-semibold">{row.label}</span><span className="font-mono text-muted">{formatPhpCurrency(row.amount)}</span></div><div className="h-2 overflow-hidden rounded-full bg-blue-50"><motion.div className="h-full rounded-full bg-gradient-to-r from-blue-700 to-blue-400" initial={{ width: 0 }} whileInView={{ width: `${row.amount === 0 ? 0 : Math.max(8, (row.amount / maxAmount) * 100)}%` }} viewport={{ once: false }} transition={{ duration: reduceMotion ? 0 : .8, delay: index * .12, ease: [0.22, 1, 0.36, 1] }} /></div></div>)}
       </div>
     </section>
   );
 }
 
 function formatCompact(value: number) { return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(value); }
-function formatCurrency(value: number) { return new Intl.NumberFormat("en", { style: "currency", currency: "USD", notation: value >= 100_000 ? "compact" : "standard", maximumFractionDigits: value >= 100_000 ? 1 : 0 }).format(value); }

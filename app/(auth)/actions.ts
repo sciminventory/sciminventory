@@ -53,6 +53,14 @@ export async function login(formData: FormData) {
   if (error) authRedirect("/login", error.message);
   const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (assurance?.nextLevel === "aal2" && assurance.currentLevel !== "aal2") redirect("/mfa/verify");
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: membership } = await supabase.from("organization_memberships").select("id").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle();
+    if (!membership) {
+      const { data: vendorAccess } = await supabase.from("vendor_users").select("id").eq("user_id", user.id).eq("status", "active").limit(1).maybeSingle();
+      if (vendorAccess) redirect("/vendor");
+    }
+  }
   redirect("/dashboard");
 }
 

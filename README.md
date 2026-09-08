@@ -1,4 +1,4 @@
-# Priority Operations Platform
+# Scim-Inventory Operations Platform
 
 A multi-tenant operations platform for inventory, procurement, logistics, and recruitment, with an explainable scikit-learn applicant-ranking service.
 
@@ -10,6 +10,8 @@ A multi-tenant operations platform for inventory, procurement, logistics, and re
 - Organization membership, roles, warehouse assignment, audit, RLS, and private Storage foundation.
 - Owner administration for organization settings, invitations, roles, membership status, warehouses, assignments, and audit history.
 - Live operational modules for products, balances, immutable stock movements, transfers, cycle counts, warehouse tasks and locations, suppliers, procurement records, shipments, and private documents.
+- End-to-end vendor lifecycle management with public applications, credential review, portal invitations, catalog mapping, purchase-order acknowledgement, shipment tracking, goods receiving, invoice matching, payments, scorecards, and improvement plans.
+- A dedicated vendor self-service portal with vendor-role separation for company administrators, catalog/order members, finance users, and logistics users.
 - Recruitment modules for job openings, consented applicant profiles, private resume storage, a stage-based hiring pipeline, and auditable screening runs.
 - Public careers pages for browsing open positions and submitting protected, rate-limited applications with a confirmation reference.
 - Identity-blind applicant ranking using TF-IDF similarity plus explicit skill, experience, and education signals. Ranking supports human review and never makes the hiring decision.
@@ -23,8 +25,8 @@ The control-tower charts and recruitment workspaces read live tenant data and re
 
 1. Install dependencies with `npm install`.
 2. Copy `.env.example` to `.env.local` and add your Supabase project URL and publishable/anon key. Add the server-only service-role key to enable owner invitations.
-3. Apply every SQL file in `supabase/migrations` in filename order. Recruitment, RBAC, and MFA require migrations `005` through `011` after the existing operations migrations.
-4. Add `http://localhost:3000/auth/callback` and `http://localhost:3000/auth/invite` to the allowed redirect URLs in Supabase Auth.
+3. Apply every SQL file in `supabase/migrations` in filename order. Recruitment, RBAC, MFA, PHP currency defaults, and vendor lifecycle support require migrations `005` through `013` after the existing operations migrations.
+4. Add `http://localhost:3000/auth/callback`, `http://localhost:3000/auth/invite`, and `http://localhost:3000/auth/vendor-invite` to the allowed redirect URLs in your authentication provider.
 5. Create the screening environment and install its dependencies:
 
    ```bash
