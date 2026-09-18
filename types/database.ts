@@ -597,100 +597,743 @@ export type Database = {
         Relationships: [];
       };
       vendor_users: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; user_id: string; role: string; status: Database["public"]["Enums"]["membership_status"]; invited_by: string | null; invited_at: string; activated_at: string | null; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; user_id: string; role?: string; status?: Database["public"]["Enums"]["membership_status"]; invited_by?: string | null; invited_at?: string; activated_at?: string | null }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          user_id: string;
+          role: string;
+          status: Database["public"]["Enums"]["membership_status"];
+          invited_by: string | null;
+          invited_at: string;
+          activated_at: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          user_id: string;
+          role?: string;
+          status?: Database["public"]["Enums"]["membership_status"];
+          invited_by?: string | null;
+          invited_at?: string;
+          activated_at?: string | null;
+        }
       >;
       vendor_contacts: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; full_name: string; email: string; phone: string | null; job_title: string | null; is_primary: boolean; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; full_name: string; email: string; phone?: string | null; job_title?: string | null; is_primary?: boolean }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          full_name: string;
+          email: string;
+          phone: string | null;
+          job_title: string | null;
+          is_primary: boolean;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          full_name: string;
+          email: string;
+          phone?: string | null;
+          job_title?: string | null;
+          is_primary?: boolean;
+          is_active?: boolean;
+        }
       >;
       vendor_addresses: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; address_type: string; label: string; address_line: string; city: string; province: string | null; postal_code: string | null; country_code: string; is_primary: boolean; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; address_type?: string; label: string; address_line: string; city: string; province?: string | null; postal_code?: string | null; country_code?: string; is_primary?: boolean }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          address_type: string;
+          label: string;
+          address_line: string;
+          city: string;
+          province: string | null;
+          postal_code: string | null;
+          country_code: string;
+          is_primary: boolean;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          address_type?: string;
+          label: string;
+          address_line: string;
+          city: string;
+          province?: string | null;
+          postal_code?: string | null;
+          country_code?: string;
+          is_primary?: boolean;
+        }
       >;
       vendor_documents: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; document_type: string; title: string; storage_path: string; file_name: string; mime_type: string; file_size: number; status: string; expires_at: string | null; verified_at: string | null; verified_by: string | null; uploaded_by: string | null; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; document_type: string; title: string; storage_path: string; file_name: string; mime_type: string; file_size: number; status?: string; expires_at?: string | null; verified_at?: string | null; verified_by?: string | null; uploaded_by?: string | null }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          document_type: string;
+          title: string;
+          storage_path: string;
+          file_name: string;
+          mime_type: string;
+          file_size: number;
+          status: string;
+          expires_at: string | null;
+          verified_at: string | null;
+          verified_by: string | null;
+          uploaded_by: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          document_type: string;
+          title: string;
+          storage_path: string;
+          file_name: string;
+          mime_type: string;
+          file_size: number;
+          status?: string;
+          expires_at?: string | null;
+          verified_at?: string | null;
+          verified_by?: string | null;
+          uploaded_by?: string | null;
+        }
       >;
       vendor_catalog_items: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; product_id: string | null; vendor_item_code: string; description: string; unit_price: number; currency: string; minimum_order_quantity: number; lead_time_days: number; delivery_window_days: number; packaging_specs: string | null; status: string; valid_from: string | null; valid_until: string | null; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; product_id?: string | null; vendor_item_code: string; description: string; unit_price: number; currency?: string; minimum_order_quantity?: number; lead_time_days?: number; delivery_window_days?: number; packaging_specs?: string | null; status?: string; valid_from?: string | null; valid_until?: string | null }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          product_id: string | null;
+          vendor_item_code: string;
+          description: string;
+          unit_price: number;
+          currency: string;
+          minimum_order_quantity: number;
+          lead_time_days: number;
+          delivery_window_days: number;
+          packaging_specs: string | null;
+          status: string;
+          valid_from: string | null;
+          valid_until: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          product_id?: string | null;
+          vendor_item_code: string;
+          description: string;
+          unit_price: number;
+          currency?: string;
+          minimum_order_quantity?: number;
+          lead_time_days?: number;
+          delivery_window_days?: number;
+          packaging_specs?: string | null;
+          status?: string;
+          valid_from?: string | null;
+          valid_until?: string | null;
+        }
       >;
       vendor_shipping_rules: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; shipping_method: string; service_area: string; cutoff_time: string | null; delay_penalty_rate: number; instructions: string | null; is_active: boolean; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; shipping_method: string; service_area: string; cutoff_time?: string | null; delay_penalty_rate?: number; instructions?: string | null; is_active?: boolean }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          shipping_method: string;
+          service_area: string;
+          cutoff_time: string | null;
+          delay_penalty_rate: number;
+          instructions: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          shipping_method: string;
+          service_area: string;
+          cutoff_time?: string | null;
+          delay_penalty_rate?: number;
+          instructions?: string | null;
+          is_active?: boolean;
+        }
       >;
       procurement_record_lines: TableDefinition<
-        { id: string; organization_id: string; procurement_record_id: string; product_id: string | null; vendor_catalog_item_id: string | null; line_number: number; description: string; quantity: number; unit_price: number; tax_rate: number; promised_date: string | null; received_quantity: number; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; procurement_record_id: string; product_id?: string | null; vendor_catalog_item_id?: string | null; line_number: number; description: string; quantity: number; unit_price?: number; tax_rate?: number; promised_date?: string | null; received_quantity?: number }
+        {
+          id: string;
+          organization_id: string;
+          procurement_record_id: string;
+          product_id: string | null;
+          vendor_catalog_item_id: string | null;
+          line_number: number;
+          description: string;
+          quantity: number;
+          unit_price: number;
+          tax_rate: number;
+          promised_date: string | null;
+          received_quantity: number;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          procurement_record_id: string;
+          product_id?: string | null;
+          vendor_catalog_item_id?: string | null;
+          line_number: number;
+          description: string;
+          quantity: number;
+          unit_price?: number;
+          tax_rate?: number;
+          promised_date?: string | null;
+          received_quantity?: number;
+        }
       >;
       demand_forecasts: TableDefinition<
-        { id: string; organization_id: string; product_id: string; warehouse_id: string; forecast_date: string; forecast_quantity: number; confidence: number | null; source: string; created_by: string; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; product_id: string; warehouse_id: string; forecast_date: string; forecast_quantity: number; confidence?: number | null; source?: string; created_by: string }
+        {
+          id: string;
+          organization_id: string;
+          product_id: string;
+          warehouse_id: string;
+          forecast_date: string;
+          forecast_quantity: number;
+          confidence: number | null;
+          source: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          product_id: string;
+          warehouse_id: string;
+          forecast_date: string;
+          forecast_quantity: number;
+          confidence?: number | null;
+          source?: string;
+          created_by: string;
+        }
       >;
       procurement_record_links: TableDefinition<
-        { id: string; organization_id: string; source_record_id: string; target_record_id: string; relation_type: string; created_by: string; created_at: string },
-        { id?: string; organization_id: string; source_record_id: string; target_record_id: string; relation_type: string; created_by: string }
+        {
+          id: string;
+          organization_id: string;
+          source_record_id: string;
+          target_record_id: string;
+          relation_type: string;
+          created_by: string;
+          created_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          source_record_id: string;
+          target_record_id: string;
+          relation_type: string;
+          created_by: string;
+        }
       >;
       purchase_order_acknowledgements: TableDefinition<
-        { id: string; organization_id: string; purchase_order_id: string; supplier_id: string; response: string; proposed_amount: number | null; proposed_delivery_date: string | null; message: string | null; responded_by: string; responded_at: string },
-        { id?: string; organization_id: string; purchase_order_id: string; supplier_id: string; response: string; proposed_amount?: number | null; proposed_delivery_date?: string | null; message?: string | null; responded_by: string; responded_at?: string }
+        {
+          id: string;
+          organization_id: string;
+          purchase_order_id: string;
+          supplier_id: string;
+          response: string;
+          proposed_amount: number | null;
+          proposed_delivery_date: string | null;
+          message: string | null;
+          responded_by: string;
+          responded_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          purchase_order_id: string;
+          supplier_id: string;
+          response: string;
+          proposed_amount?: number | null;
+          proposed_delivery_date?: string | null;
+          message?: string | null;
+          responded_by: string;
+          responded_at?: string;
+        }
       >;
       workflow_events: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string | null; entity_type: string; entity_id: string; from_status: string | null; to_status: string; message: string | null; actor_id: string | null; occurred_at: string },
-        { id?: string; organization_id: string; supplier_id?: string | null; entity_type: string; entity_id: string; from_status?: string | null; to_status: string; message?: string | null; actor_id?: string | null; occurred_at?: string }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string | null;
+          entity_type: string;
+          entity_id: string;
+          from_status: string | null;
+          to_status: string;
+          message: string | null;
+          actor_id: string | null;
+          occurred_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id?: string | null;
+          entity_type: string;
+          entity_id: string;
+          from_status?: string | null;
+          to_status: string;
+          message?: string | null;
+          actor_id?: string | null;
+          occurred_at?: string;
+        }
+      >;
+      vendor_conversations: TableDefinition<
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          subject: string;
+          context_type: string;
+          purchase_order_id: string | null;
+          shipment_id: string | null;
+          invoice_id: string | null;
+          status: string;
+          created_by: string;
+          last_message_at: string;
+          internal_last_read_at: string | null;
+          vendor_last_read_at: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          subject: string;
+          context_type?: string;
+          purchase_order_id?: string | null;
+          shipment_id?: string | null;
+          invoice_id?: string | null;
+          status?: string;
+          created_by: string;
+          last_message_at?: string;
+          internal_last_read_at?: string | null;
+          vendor_last_read_at?: string | null;
+        }
+      >;
+      vendor_messages: TableDefinition<
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          conversation_id: string;
+          sender_id: string;
+          sender_party: string;
+          body: string;
+          created_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          conversation_id: string;
+          sender_id: string;
+          sender_party: string;
+          body: string;
+          created_at?: string;
+        }
       >;
       shipment_lines: TableDefinition<
-        { id: string; organization_id: string; shipment_id: string; purchase_order_line_id: string | null; product_id: string | null; description: string; quantity: number; received_quantity: number; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; shipment_id: string; purchase_order_line_id?: string | null; product_id?: string | null; description: string; quantity: number; received_quantity?: number }
+        {
+          id: string;
+          organization_id: string;
+          shipment_id: string;
+          purchase_order_line_id: string | null;
+          product_id: string | null;
+          description: string;
+          quantity: number;
+          received_quantity: number;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          shipment_id: string;
+          purchase_order_line_id?: string | null;
+          product_id?: string | null;
+          description: string;
+          quantity: number;
+          received_quantity?: number;
+        }
       >;
       shipment_events: TableDefinition<
-        { id: string; organization_id: string; shipment_id: string; status: string; location: string | null; latitude: number | null; longitude: number | null; message: string | null; recorded_by: string; occurred_at: string },
-        { id?: string; organization_id: string; shipment_id: string; status: string; location?: string | null; latitude?: number | null; longitude?: number | null; message?: string | null; recorded_by: string; occurred_at?: string }
+        {
+          id: string;
+          organization_id: string;
+          shipment_id: string;
+          status: string;
+          location: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          message: string | null;
+          recorded_by: string;
+          occurred_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          shipment_id: string;
+          status: string;
+          location?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          message?: string | null;
+          recorded_by: string;
+          occurred_at?: string;
+        }
       >;
       goods_receipts: TableDefinition<
-        { id: string; organization_id: string; shipment_id: string; purchase_order_id: string | null; warehouse_id: string; reference: string; status: string; received_by: string; received_at: string; notes: string | null; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; shipment_id: string; purchase_order_id?: string | null; warehouse_id: string; reference: string; status?: string; received_by: string; received_at?: string; notes?: string | null }
+        {
+          id: string;
+          organization_id: string;
+          shipment_id: string;
+          purchase_order_id: string | null;
+          warehouse_id: string;
+          reference: string;
+          status: string;
+          received_by: string;
+          received_at: string;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          shipment_id: string;
+          purchase_order_id?: string | null;
+          warehouse_id: string;
+          reference: string;
+          status?: string;
+          received_by: string;
+          received_at?: string;
+          notes?: string | null;
+        }
       >;
       goods_receipt_lines: TableDefinition<
-        { id: string; organization_id: string; goods_receipt_id: string; shipment_line_id: string; product_id: string | null; expected_quantity: number; accepted_quantity: number; rejected_quantity: number; rejection_reason: string | null; quality_ok: boolean; condition_ok: boolean; packaging_ok: boolean; created_at: string },
-        { id?: string; organization_id: string; goods_receipt_id: string; shipment_line_id: string; product_id?: string | null; expected_quantity: number; accepted_quantity?: number; rejected_quantity?: number; rejection_reason?: string | null; quality_ok?: boolean; condition_ok?: boolean; packaging_ok?: boolean }
+        {
+          id: string;
+          organization_id: string;
+          goods_receipt_id: string;
+          shipment_line_id: string;
+          product_id: string | null;
+          expected_quantity: number;
+          accepted_quantity: number;
+          rejected_quantity: number;
+          rejection_reason: string | null;
+          quality_ok: boolean;
+          condition_ok: boolean;
+          packaging_ok: boolean;
+          created_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          goods_receipt_id: string;
+          shipment_line_id: string;
+          product_id?: string | null;
+          expected_quantity: number;
+          accepted_quantity?: number;
+          rejected_quantity?: number;
+          rejection_reason?: string | null;
+          quality_ok?: boolean;
+          condition_ok?: boolean;
+          packaging_ok?: boolean;
+        }
       >;
       vendor_return_requests: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; goods_receipt_line_id: string; reference: string; reason: string; quantity: number; resolution: string | null; status: string; created_by: string; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; goods_receipt_line_id: string; reference: string; reason: string; quantity: number; resolution?: string | null; status?: string; created_by: string }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          goods_receipt_line_id: string;
+          reference: string;
+          reason: string;
+          quantity: number;
+          resolution: string | null;
+          status: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          goods_receipt_line_id: string;
+          reference: string;
+          reason: string;
+          quantity: number;
+          resolution?: string | null;
+          status?: string;
+          created_by: string;
+        }
       >;
       vendor_invoices: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; purchase_order_id: string; invoice_number: string; invoice_date: string; due_date: string; subtotal: number; tax_amount: number; total_amount: number; currency: string; status: string; storage_path: string | null; mismatch_reason: string | null; submitted_by: string; submitted_at: string; approved_by: string | null; approved_at: string | null; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; purchase_order_id: string; invoice_number: string; invoice_date: string; due_date: string; subtotal: number; tax_amount?: number; total_amount: number; currency?: string; status?: string; storage_path?: string | null; mismatch_reason?: string | null; submitted_by: string; submitted_at?: string; approved_by?: string | null; approved_at?: string | null }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          purchase_order_id: string;
+          invoice_number: string;
+          invoice_date: string;
+          due_date: string;
+          subtotal: number;
+          tax_amount: number;
+          total_amount: number;
+          currency: string;
+          status: string;
+          storage_path: string | null;
+          mismatch_reason: string | null;
+          submitted_by: string;
+          submitted_at: string;
+          approved_by: string | null;
+          approved_at: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          purchase_order_id: string;
+          invoice_number: string;
+          invoice_date: string;
+          due_date: string;
+          subtotal: number;
+          tax_amount?: number;
+          total_amount: number;
+          currency?: string;
+          status?: string;
+          storage_path?: string | null;
+          mismatch_reason?: string | null;
+          submitted_by: string;
+          submitted_at?: string;
+          approved_by?: string | null;
+          approved_at?: string | null;
+        }
       >;
       vendor_invoice_lines: TableDefinition<
-        { id: string; organization_id: string; invoice_id: string; purchase_order_line_id: string | null; description: string; quantity: number; unit_price: number; tax_rate: number; created_at: string },
-        { id?: string; organization_id: string; invoice_id: string; purchase_order_line_id?: string | null; description: string; quantity: number; unit_price: number; tax_rate?: number }
+        {
+          id: string;
+          organization_id: string;
+          invoice_id: string;
+          purchase_order_line_id: string | null;
+          description: string;
+          quantity: number;
+          unit_price: number;
+          tax_rate: number;
+          created_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          invoice_id: string;
+          purchase_order_line_id?: string | null;
+          description: string;
+          quantity: number;
+          unit_price: number;
+          tax_rate?: number;
+        }
       >;
       invoice_matches: TableDefinition<
-        { id: string; organization_id: string; invoice_id: string; purchase_order_amount: number; received_amount: number; invoice_amount: number; price_variance: number; quantity_variance: number; result: string; details: Json; matched_by: string; matched_at: string },
-        { id?: string; organization_id: string; invoice_id: string; purchase_order_amount: number; received_amount: number; invoice_amount: number; price_variance?: number; quantity_variance?: number; result: string; details?: Json; matched_by: string; matched_at?: string }
+        {
+          id: string;
+          organization_id: string;
+          invoice_id: string;
+          purchase_order_amount: number;
+          received_amount: number;
+          invoice_amount: number;
+          price_variance: number;
+          quantity_variance: number;
+          result: string;
+          details: Json;
+          matched_by: string;
+          matched_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          invoice_id: string;
+          purchase_order_amount: number;
+          received_amount: number;
+          invoice_amount: number;
+          price_variance?: number;
+          quantity_variance?: number;
+          result: string;
+          details?: Json;
+          matched_by: string;
+          matched_at?: string;
+        }
       >;
       payment_records: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; invoice_id: string; reference: string; amount: number; currency: string; payment_method: string | null; status: string; scheduled_at: string | null; paid_at: string | null; recorded_by: string; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; invoice_id: string; reference: string; amount: number; currency?: string; payment_method?: string | null; status?: string; scheduled_at?: string | null; paid_at?: string | null; recorded_by: string }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          invoice_id: string;
+          reference: string;
+          amount: number;
+          currency: string;
+          payment_method: string | null;
+          status: string;
+          scheduled_at: string | null;
+          paid_at: string | null;
+          recorded_by: string;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          invoice_id: string;
+          reference: string;
+          amount: number;
+          currency?: string;
+          payment_method?: string | null;
+          status?: string;
+          scheduled_at?: string | null;
+          paid_at?: string | null;
+          recorded_by: string;
+        }
       >;
       vendor_performance_snapshots: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; period_start: string; period_end: string; on_time_delivery_rate: number; fulfillment_rate: number; quality_score: number; accuracy_score: number; response_time_hours: number; overall_score: number; order_count: number; calculated_at: string; calculated_by: string | null },
-        { id?: string; organization_id: string; supplier_id: string; period_start: string; period_end: string; on_time_delivery_rate?: number; fulfillment_rate?: number; quality_score?: number; accuracy_score?: number; response_time_hours?: number; overall_score?: number; order_count?: number; calculated_at?: string; calculated_by?: string | null }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          period_start: string;
+          period_end: string;
+          on_time_delivery_rate: number;
+          fulfillment_rate: number;
+          quality_score: number;
+          accuracy_score: number;
+          response_time_hours: number;
+          overall_score: number;
+          order_count: number;
+          calculated_at: string;
+          calculated_by: string | null;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          period_start: string;
+          period_end: string;
+          on_time_delivery_rate?: number;
+          fulfillment_rate?: number;
+          quality_score?: number;
+          accuracy_score?: number;
+          response_time_hours?: number;
+          overall_score?: number;
+          order_count?: number;
+          calculated_at?: string;
+          calculated_by?: string | null;
+        }
       >;
       vendor_reviews: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; action: string; summary: string; review_date: string; next_review_date: string | null; created_by: string; created_at: string },
-        { id?: string; organization_id: string; supplier_id: string; action: string; summary: string; review_date?: string; next_review_date?: string | null; created_by: string }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          action: string;
+          summary: string;
+          review_date: string;
+          next_review_date: string | null;
+          created_by: string;
+          created_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          action: string;
+          summary: string;
+          review_date?: string;
+          next_review_date?: string | null;
+          created_by: string;
+        }
       >;
       vendor_improvement_plans: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string; title: string; objectives: string; due_date: string; status: string; owner_id: string; created_at: string; updated_at: string },
-        { id?: string; organization_id: string; supplier_id: string; title: string; objectives: string; due_date: string; status?: string; owner_id: string }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string;
+          title: string;
+          objectives: string;
+          due_date: string;
+          status: string;
+          owner_id: string;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id: string;
+          title: string;
+          objectives: string;
+          due_date: string;
+          status?: string;
+          owner_id: string;
+        }
       >;
       notifications: TableDefinition<
-        { id: string; organization_id: string; supplier_id: string | null; user_id: string | null; audience: string; title: string; message: string; href: string | null; read_at: string | null; created_at: string },
-        { id?: string; organization_id: string; supplier_id?: string | null; user_id?: string | null; audience: string; title: string; message: string; href?: string | null; read_at?: string | null }
+        {
+          id: string;
+          organization_id: string;
+          supplier_id: string | null;
+          user_id: string | null;
+          audience: string;
+          title: string;
+          message: string;
+          href: string | null;
+          read_at: string | null;
+          created_at: string;
+        },
+        {
+          id?: string;
+          organization_id: string;
+          supplier_id?: string | null;
+          user_id?: string | null;
+          audience: string;
+          title: string;
+          message: string;
+          href?: string | null;
+          read_at?: string | null;
+        }
       >;
       public_vendor_application_attempts: TableDefinition<
         { id: string; identifier_hash: string; attempted_at: string },
@@ -698,73 +1341,149 @@ export type Database = {
       >;
       job_openings: {
         Row: {
-          id: string; organization_id: string; reference: string; title: string;
-          department: string; location: string | null; employment_type: string;
-          status: Database["public"]["Enums"]["job_status"]; description: string;
-          required_skills: string[]; preferred_skills: string[];
-          min_years_experience: number; education_level: string; created_by: string;
-          opened_at: string | null; closed_at: string | null; created_at: string; updated_at: string;
+          id: string;
+          organization_id: string;
+          reference: string;
+          title: string;
+          department: string;
+          location: string | null;
+          employment_type: string;
+          status: Database["public"]["Enums"]["job_status"];
+          description: string;
+          required_skills: string[];
+          preferred_skills: string[];
+          min_years_experience: number;
+          education_level: string;
+          created_by: string;
+          opened_at: string | null;
+          closed_at: string | null;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
-          id?: string; organization_id: string; reference: string; title: string;
-          department: string; location?: string | null; employment_type?: string;
-          status?: Database["public"]["Enums"]["job_status"]; description: string;
-          required_skills?: string[]; preferred_skills?: string[];
-          min_years_experience?: number; education_level?: string; created_by: string;
-          opened_at?: string | null; closed_at?: string | null;
+          id?: string;
+          organization_id: string;
+          reference: string;
+          title: string;
+          department: string;
+          location?: string | null;
+          employment_type?: string;
+          status?: Database["public"]["Enums"]["job_status"];
+          description: string;
+          required_skills?: string[];
+          preferred_skills?: string[];
+          min_years_experience?: number;
+          education_level?: string;
+          created_by: string;
+          opened_at?: string | null;
+          closed_at?: string | null;
         };
         Update: {
-          title?: string; department?: string; location?: string | null; employment_type?: string;
-          status?: Database["public"]["Enums"]["job_status"]; description?: string;
-          required_skills?: string[]; preferred_skills?: string[];
-          min_years_experience?: number; education_level?: string;
-          opened_at?: string | null; closed_at?: string | null; updated_at?: string;
+          title?: string;
+          department?: string;
+          location?: string | null;
+          employment_type?: string;
+          status?: Database["public"]["Enums"]["job_status"];
+          description?: string;
+          required_skills?: string[];
+          preferred_skills?: string[];
+          min_years_experience?: number;
+          education_level?: string;
+          opened_at?: string | null;
+          closed_at?: string | null;
+          updated_at?: string;
         };
         Relationships: [];
       };
       applicants: {
         Row: {
-          id: string; organization_id: string; full_name: string; email: string;
-          phone: string | null; location: string | null; source: string;
-          consent_at: string; created_by: string | null; created_at: string; updated_at: string;
+          id: string;
+          organization_id: string;
+          full_name: string;
+          email: string;
+          phone: string | null;
+          location: string | null;
+          source: string;
+          consent_at: string;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
-          id?: string; organization_id: string; full_name: string; email: string;
-          phone?: string | null; location?: string | null; source?: string;
-          consent_at?: string; created_by?: string | null;
+          id?: string;
+          organization_id: string;
+          full_name: string;
+          email: string;
+          phone?: string | null;
+          location?: string | null;
+          source?: string;
+          consent_at?: string;
+          created_by?: string | null;
         };
         Update: {
-          full_name?: string; email?: string; phone?: string | null;
-          location?: string | null; source?: string; updated_at?: string;
+          full_name?: string;
+          email?: string;
+          phone?: string | null;
+          location?: string | null;
+          source?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
       job_applications: {
         Row: {
-          id: string; organization_id: string; job_id: string; applicant_id: string;
+          id: string;
+          organization_id: string;
+          job_id: string;
+          applicant_id: string;
           stage: Database["public"]["Enums"]["application_stage"];
-          application_reference: string; cover_letter: string | null; submission_channel: string;
-          resume_text: string; resume_storage_path: string | null; resume_file_name: string | null;
+          application_reference: string;
+          cover_letter: string | null;
+          submission_channel: string;
+          resume_text: string;
+          resume_storage_path: string | null;
+          resume_file_name: string | null;
           screening_consent_at: string | null;
-          years_experience: number; education_level: string; declared_skills: string[];
-          recruiter_notes: string | null; applied_at: string; updated_at: string;
+          years_experience: number;
+          education_level: string;
+          declared_skills: string[];
+          recruiter_notes: string | null;
+          applied_at: string;
+          updated_at: string;
         };
         Insert: {
-          id?: string; organization_id: string; job_id: string; applicant_id: string;
+          id?: string;
+          organization_id: string;
+          job_id: string;
+          applicant_id: string;
           stage?: Database["public"]["Enums"]["application_stage"];
-          application_reference?: string; cover_letter?: string | null; submission_channel?: string;
-          resume_text: string; resume_storage_path?: string | null; resume_file_name?: string | null;
+          application_reference?: string;
+          cover_letter?: string | null;
+          submission_channel?: string;
+          resume_text: string;
+          resume_storage_path?: string | null;
+          resume_file_name?: string | null;
           screening_consent_at?: string | null;
-          years_experience?: number; education_level?: string; declared_skills?: string[];
-          recruiter_notes?: string | null; applied_at?: string;
+          years_experience?: number;
+          education_level?: string;
+          declared_skills?: string[];
+          recruiter_notes?: string | null;
+          applied_at?: string;
         };
         Update: {
           stage?: Database["public"]["Enums"]["application_stage"];
-          application_reference?: string; cover_letter?: string | null; submission_channel?: string;
-          resume_text?: string; resume_storage_path?: string | null; resume_file_name?: string | null;
+          application_reference?: string;
+          cover_letter?: string | null;
+          submission_channel?: string;
+          resume_text?: string;
+          resume_storage_path?: string | null;
+          resume_file_name?: string | null;
           screening_consent_at?: string | null;
-          years_experience?: number; education_level?: string; declared_skills?: string[];
-          recruiter_notes?: string | null; updated_at?: string;
+          years_experience?: number;
+          education_level?: string;
+          declared_skills?: string[];
+          recruiter_notes?: string | null;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -776,38 +1495,74 @@ export type Database = {
       };
       screening_runs: {
         Row: {
-          id: string; organization_id: string; job_id: string;
+          id: string;
+          organization_id: string;
+          job_id: string;
           status: Database["public"]["Enums"]["screening_run_status"];
-          model_name: string; model_version: string; weights: Json;
-          application_count: number; error_message: string | null; created_by: string;
-          created_at: string; completed_at: string | null;
+          model_name: string;
+          model_version: string;
+          weights: Json;
+          application_count: number;
+          error_message: string | null;
+          created_by: string;
+          created_at: string;
+          completed_at: string | null;
         };
         Insert: {
-          id?: string; organization_id: string; job_id: string;
+          id?: string;
+          organization_id: string;
+          job_id: string;
           status?: Database["public"]["Enums"]["screening_run_status"];
-          model_name?: string; model_version: string; weights?: Json;
-          application_count?: number; error_message?: string | null; created_by: string;
+          model_name?: string;
+          model_version: string;
+          weights?: Json;
+          application_count?: number;
+          error_message?: string | null;
+          created_by: string;
           completed_at?: string | null;
         };
         Update: {
           status?: Database["public"]["Enums"]["screening_run_status"];
-          model_name?: string; model_version?: string; weights?: Json;
-          application_count?: number; error_message?: string | null; completed_at?: string | null;
+          model_name?: string;
+          model_version?: string;
+          weights?: Json;
+          application_count?: number;
+          error_message?: string | null;
+          completed_at?: string | null;
         };
         Relationships: [];
       };
       screening_scores: {
         Row: {
-          id: string; organization_id: string; screening_run_id: string; application_id: string;
-          rank: number; overall_score: number; semantic_score: number; skills_score: number;
-          experience_score: number; education_score: number; matched_skills: string[];
-          missing_skills: string[]; explanation: Json; created_at: string;
+          id: string;
+          organization_id: string;
+          screening_run_id: string;
+          application_id: string;
+          rank: number;
+          overall_score: number;
+          semantic_score: number;
+          skills_score: number;
+          experience_score: number;
+          education_score: number;
+          matched_skills: string[];
+          missing_skills: string[];
+          explanation: Json;
+          created_at: string;
         };
         Insert: {
-          id?: string; organization_id: string; screening_run_id: string; application_id: string;
-          rank: number; overall_score: number; semantic_score: number; skills_score: number;
-          experience_score: number; education_score: number; matched_skills?: string[];
-          missing_skills?: string[]; explanation?: Json;
+          id?: string;
+          organization_id: string;
+          screening_run_id: string;
+          application_id: string;
+          rank: number;
+          overall_score: number;
+          semantic_score: number;
+          skills_score: number;
+          experience_score: number;
+          education_score: number;
+          matched_skills?: string[];
+          missing_skills?: string[];
+          explanation?: Json;
         };
         Update: never;
         Relationships: [];
@@ -836,7 +1591,23 @@ export type Database = {
         Relationships: [];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      vendor_activity_history: {
+        Row: {
+          event_id: string;
+          organization_id: string;
+          supplier_id: string | null;
+          kind: string;
+          title: string;
+          detail: string | null;
+          status: string;
+          reference: string;
+          amount: number | null;
+          occurred_at: string;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
       create_organization: {
         Args: { organization_name: string; organization_slug: string };
@@ -869,24 +1640,91 @@ export type Database = {
         Args: { target_organization_id: string; target_supplier_id: string };
         Returns: boolean;
       };
+      manage_vendor_contact: {
+        Args: {
+          target_organization_id: string;
+          target_supplier_id: string;
+          target_contact_id: string | null;
+          contact_full_name: string;
+          contact_email: string;
+          contact_phone: string;
+          contact_job_title: string;
+          contact_is_primary: boolean;
+          contact_is_active: boolean;
+        };
+        Returns: string;
+      };
+      archive_vendor_contact: {
+        Args: {
+          target_organization_id: string;
+          target_supplier_id: string;
+          target_contact_id: string;
+        };
+        Returns: undefined;
+      };
+      refresh_vendor_performance: {
+        Args: {
+          target_organization_id: string;
+          target_supplier_id: string;
+        };
+        Returns: undefined;
+      };
+      can_access_vendor_communication: {
+        Args: {
+          target_organization_id: string;
+          target_supplier_id: string;
+        };
+        Returns: boolean;
+      };
+      create_vendor_conversation: {
+        Args: {
+          target_organization_id: string;
+          target_supplier_id: string;
+          conversation_subject: string;
+          conversation_context_type: string;
+          target_context_id: string | null;
+          initial_message: string;
+        };
+        Returns: string;
+      };
+      send_vendor_message: {
+        Args: { target_conversation_id: string; message_body: string };
+        Returns: string;
+      };
+      mark_vendor_conversation_read: {
+        Args: { target_conversation_id: string };
+        Returns: undefined;
+      };
       generate_reorder_requisitions: {
         Args: { target_organization_id: string };
         Returns: number;
       };
       vendor_update_my_profile: {
         Args: {
-          target_organization_id: string; target_supplier_id: string; new_contact_email: string;
-          new_phone: string; new_website: string; new_address_line: string; new_city: string;
-          new_province: string; new_postal_code: string; new_delivery_capacity: number;
-          new_delivery_methods: string[]; new_service_areas: string[];
+          target_organization_id: string;
+          target_supplier_id: string;
+          new_contact_email: string;
+          new_phone: string;
+          new_website: string;
+          new_address_line: string;
+          new_city: string;
+          new_province: string;
+          new_postal_code: string;
+          new_delivery_capacity: number;
+          new_delivery_methods: string[];
+          new_service_areas: string[];
         };
         Returns: undefined;
       };
       acknowledge_purchase_order: {
         Args: {
-          target_organization_id: string; target_supplier_id: string; target_purchase_order_id: string;
-          target_response: string; target_proposed_amount?: number | null;
-          target_proposed_delivery_date?: string | null; target_message?: string | null;
+          target_organization_id: string;
+          target_supplier_id: string;
+          target_purchase_order_id: string;
+          target_response: string;
+          target_proposed_amount?: number | null;
+          target_proposed_delivery_date?: string | null;
+          target_message?: string | null;
         };
         Returns: string;
       };
@@ -974,18 +1812,11 @@ export type Database = {
         | "recruiter";
       membership_status: "invited" | "active" | "suspended";
       inventory_movement_type:
-        | "receipt"
-        | "issue"
-        | "adjustment"
-        | "transfer_in"
-        | "transfer_out";
+        "receipt" | "issue" | "adjustment" | "transfer_in" | "transfer_out";
       inventory_operation_type: "transfer" | "cycle_count";
       warehouse_task_type: "receiving" | "putaway" | "picking";
       procurement_record_type:
-        | "requisition"
-        | "rfq"
-        | "quotation"
-        | "purchase_order";
+        "requisition" | "rfq" | "quotation" | "purchase_order";
       job_status: "draft" | "open" | "paused" | "closed" | "archived";
       application_stage:
         | "applied"
