@@ -289,6 +289,7 @@ export type Database = {
           is_active?: boolean;
         };
         Update: {
+          warehouse_id?: string;
           code?: string;
           name?: string;
           location_type?: string;
@@ -302,6 +303,7 @@ export type Database = {
           id: string;
           organization_id: string;
           warehouse_id: string;
+          location_id: string | null;
           product_id: string;
           on_hand: number;
           reserved: number;
@@ -311,11 +313,12 @@ export type Database = {
           id?: string;
           organization_id: string;
           warehouse_id: string;
+          location_id?: string | null;
           product_id: string;
           on_hand?: number;
           reserved?: number;
         };
-        Update: { on_hand?: number; reserved?: number; updated_at?: string };
+        Update: { location_id?: string | null; on_hand?: number; reserved?: number; updated_at?: string };
         Relationships: [];
       };
       inventory_movements: {
@@ -323,6 +326,7 @@ export type Database = {
           id: string;
           organization_id: string;
           warehouse_id: string;
+          location_id: string | null;
           product_id: string;
           movement_type: Database["public"]["Enums"]["inventory_movement_type"];
           quantity: number;
@@ -339,6 +343,7 @@ export type Database = {
           id?: string;
           organization_id: string;
           warehouse_id: string;
+          location_id?: string | null;
           product_id: string;
           movement_type: Database["public"]["Enums"]["inventory_movement_type"];
           quantity: number;
@@ -385,6 +390,7 @@ export type Database = {
           created_by: string;
         };
         Update: {
+          reference?: string;
           title?: string;
           source_warehouse_id?: string | null;
           destination_warehouse_id?: string | null;
@@ -426,6 +432,8 @@ export type Database = {
           created_by: string;
         };
         Update: {
+          warehouse_id?: string;
+          reference?: string;
           title?: string;
           status?: string;
           quantity?: number | null;
@@ -477,6 +485,7 @@ export type Database = {
           created_by: string;
         };
         Update: {
+          reference?: string;
           title?: string;
           supplier_id?: string | null;
           warehouse_id?: string | null;
@@ -535,6 +544,7 @@ export type Database = {
           created_by: string;
         };
         Update: {
+          reference?: string;
           title?: string;
           carrier?: string | null;
           tracking_number?: string | null;
@@ -584,6 +594,7 @@ export type Database = {
           uploaded_by: string;
         };
         Update: {
+          reference?: string;
           title?: string;
           document_type?: string;
           storage_path?: string | null;
@@ -1789,10 +1800,30 @@ export type Database = {
         };
         Returns: undefined;
       };
+      reset_organization_data: {
+        Args: {
+          target_organization_id: string;
+          confirmed_organization_name: string;
+        };
+        Returns: number;
+      };
       post_inventory_movement: {
         Args: {
           target_organization_id: string;
           target_warehouse_id: string;
+          target_product_id: string;
+          target_movement_type: Database["public"]["Enums"]["inventory_movement_type"];
+          target_quantity: number;
+          target_reference: string;
+          target_notes?: string | null;
+        };
+        Returns: string;
+      };
+      post_inventory_movement_at_location: {
+        Args: {
+          target_organization_id: string;
+          target_warehouse_id: string;
+          target_location_id: string;
           target_product_id: string;
           target_movement_type: Database["public"]["Enums"]["inventory_movement_type"];
           target_quantity: number;

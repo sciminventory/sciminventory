@@ -13,6 +13,7 @@ import {
   Warehouse as WarehouseIcon,
 } from "lucide-react";
 import { AdminActionButton } from "@/components/operations/admin-action-button";
+import { WorkspaceResetPanel } from "@/components/operations/workspace-reset-panel";
 import { ToastNotification } from "@/components/ui/toast-notification";
 import {
   inviteMember,
@@ -44,6 +45,9 @@ export type AdminWarehouse = {
   city: string | null;
   countryCode: string | null;
   isActive: boolean;
+  onHand: number;
+  reserved: number;
+  stockedProducts: number;
 };
 
 export type AdminAssignment = {
@@ -156,6 +160,12 @@ export function AdminConsole(props: Props) {
           </a>
           <a href="#audit" className="rounded-lg px-3 py-2 hover:bg-mist">
             Audit
+          </a>
+          <a
+            href="#danger-zone"
+            className="rounded-lg px-3 py-2 text-red-700 hover:bg-red-50"
+          >
+            Danger zone
           </a>
         </nav>
       </header>
@@ -559,6 +569,11 @@ export function AdminConsole(props: Props) {
           )}
         </div>
       </section>
+
+      <WorkspaceResetPanel
+        organizationId={props.organization.id}
+        organizationName={props.organization.name}
+      />
     </div>
   );
 }
@@ -696,6 +711,11 @@ function WarehouseForm({
     >
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="warehouseId" value={warehouse.id} />
+      <div className="col-span-full grid grid-cols-3 gap-2 rounded-xl border border-blue-100 bg-blue-50/60 p-3">
+        <WarehouseMetric label="On hand" value={formatQuantity(warehouse.onHand)} />
+        <WarehouseMetric label="Available" value={formatQuantity(warehouse.onHand - warehouse.reserved)} />
+        <WarehouseMetric label="Stocked SKUs" value={warehouse.stockedProducts.toLocaleString()} />
+      </div>
       <Field label="Code" name="code" defaultValue={warehouse.code} />
       <Field label="Name" name="name" defaultValue={warehouse.name} />
       <Field label="City" name="city" defaultValue={warehouse.city ?? ""} />
@@ -719,6 +739,14 @@ function WarehouseForm({
       </AdminActionButton>
     </form>
   );
+}
+
+function WarehouseMetric({ label, value }: { label: string; value: string }) {
+  return <div><p className="text-xs font-semibold text-muted">{label}</p><p className="mt-1 font-mono text-base font-bold text-ink">{value}</p></div>;
+}
+
+function formatQuantity(value: number) {
+  return new Intl.NumberFormat("en", { maximumFractionDigits: 4 }).format(value);
 }
 
 function SectionHeader({

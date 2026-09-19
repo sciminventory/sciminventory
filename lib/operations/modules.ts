@@ -122,6 +122,7 @@ export const moduleConfigs: Record<OperationalModule, ModuleConfig> = {
     statusOptions: ["receiving", "storage", "picking", "staging", "quarantine"],
     createLabel: "Add location",
     needsWarehouse: true,
+    quantityLabel: "On-hand quantity",
     detailLabel: "Location type",
   },
   requisitions: procurementConfig("requisitions", "Requisitions", "Purchase requisition"),

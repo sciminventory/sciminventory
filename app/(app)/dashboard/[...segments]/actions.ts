@@ -24,6 +24,7 @@ const itemSchema = z.object({
   warehouseId: z.string().trim(),
   destinationWarehouseId: z.string().trim(),
   relatedId: z.string().trim(),
+  locationId: z.string().trim(),
   detail: z.string().trim().max(240),
   dueAt: z.string().trim(),
 });
@@ -90,6 +91,7 @@ export async function createOperationalItem(formData: FormData) {
     warehouseId: String(formData.get("warehouseId") ?? ""),
     destinationWarehouseId: String(formData.get("destinationWarehouseId") ?? ""),
     relatedId: String(formData.get("relatedId") ?? ""),
+    locationId: String(formData.get("locationId") ?? ""),
     detail: String(formData.get("detail") ?? ""),
     dueAt: String(formData.get("dueAt") ?? ""),
   };
@@ -104,6 +106,7 @@ export async function createOperationalItem(formData: FormData) {
   const warehouseId = uuidOrNull(data.warehouseId);
   const destinationWarehouseId = uuidOrNull(data.destinationWarehouseId);
   const relatedId = uuidOrNull(data.relatedId);
+  const locationId = uuidOrNull(data.locationId);
   const dueAt = dateOrNull(data.dueAt);
   let error: { message: string } | null = null;
 
@@ -135,14 +138,15 @@ export async function createOperationalItem(formData: FormData) {
       location_type: data.status || "storage",
     }));
   } else if (data.module === "movements") {
-    if (!warehouseId || !relatedId || quantity === null || quantity === 0) {
-      routeTo(data.module, "Select a warehouse and product, then enter a non-zero quantity.", "error");
+    if (!warehouseId || !locationId || !relatedId || quantity === null || quantity === 0) {
+      routeTo(data.module, "Select a warehouse, location, and product, then enter a non-zero quantity.", "error");
     }
     const movementType = z.enum(["receipt", "issue", "adjustment", "transfer_in", "transfer_out"]).safeParse(data.status);
     if (!movementType.success) routeTo(data.module, "Select a valid movement type.", "error");
-    ({ error } = await supabase.rpc("post_inventory_movement", {
+    ({ error } = await supabase.rpc("post_inventory_movement_at_location", {
       target_organization_id: data.organizationId,
       target_warehouse_id: warehouseId,
+      target_location_id: locationId,
       target_product_id: relatedId,
       target_movement_type: movementType.data,
       target_quantity: quantity,
@@ -237,6 +241,60 @@ export async function createOperationalItem(formData: FormData) {
   if (error) routeTo(data.module, error.message, "error");
   refresh(data.module);
   routeTo(data.module, `${moduleConfigs[data.module].singular.replace(/^./, (letter) => letter.toUpperCase())} created successfully.`);
+}
+
+export async function updateOperationalItem(formData: FormData) {
+  const itemId = z.uuid().safeParse(formData.get("itemId"));
+  const raw = {
+    organizationId: String(formData.get("organizationId") ?? ""),
+    module: String(formData.get("module") ?? ""),
+    reference: String(formData.get("reference") ?? ""),
+    title: String(formData.get("title") ?? ""),
+    status: String(formData.get("status") ?? ""),
+    quantity: String(formData.get("quantity") ?? ""),
+    warehouseId: String(formData.get("warehouseId") ?? ""),
+    destinationWarehouseId: String(formData.get("destinationWarehouseId") ?? ""),
+    relatedId: String(formData.get("relatedId") ?? ""),
+    locationId: String(formData.get("locationId") ?? ""),
+    detail: String(formData.get("detail") ?? ""),
+    dueAt: String(formData.get("dueAt") ?? ""),
+  };
+  const result = itemSchema.safeParse(raw);
+  const fallback = moduleSchema.safeParse(raw.module).success ? raw.module as OperationalModule : "products";
+  if (!itemId.success || !result.success) routeTo(fallback, result.success ? "Invalid record." : result.error.issues[0]?.message ?? "Check the form details.", "error");
+  const data = result.data;
+  if (data.module === "stock" || data.module === "movements") routeTo(data.module, "Ledger and balance records cannot be edited directly.", "error");
+  const { supabase } = await requireContext(data.organizationId, data.module);
+  const quantity = numberOrNull(data.quantity);
+  const warehouseId = uuidOrNull(data.warehouseId);
+  const destinationWarehouseId = uuidOrNull(data.destinationWarehouseId);
+  const relatedId = uuidOrNull(data.relatedId);
+  const dueAt = dateOrNull(data.dueAt);
+  let error: { message: string } | null = null;
+  if (data.module === "products") {
+    ({ error } = await supabase.from("products").update({ sku: data.reference.toUpperCase(), name: data.title, category: data.detail || null, reorder_point: quantity ?? 0, is_active: data.status === "active" }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+  } else if (data.module === "suppliers") {
+    ({ error } = await supabase.from("suppliers").update({ code: data.reference.toUpperCase(), name: data.title, contact_email: data.detail || null, lead_time_days: quantity === null ? null : Math.round(quantity), status: data.status }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+  } else if (data.module === "locations") {
+    if (!warehouseId) routeTo(data.module, "Select a warehouse.", "error");
+    ({ error } = await supabase.from("warehouse_locations").update({ warehouse_id: warehouseId, code: data.reference.toUpperCase(), name: data.title, location_type: data.status }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+  } else if (data.module === "transfers" || data.module === "cycle_counts") {
+    if (!warehouseId) routeTo(data.module, "Select a warehouse.", "error");
+    if (data.module === "transfers" && (!destinationWarehouseId || destinationWarehouseId === warehouseId)) routeTo(data.module, "Select a different destination warehouse.", "error");
+    ({ error } = await supabase.from("inventory_operations").update({ reference: data.reference, title: data.title, source_warehouse_id: warehouseId, destination_warehouse_id: data.module === "transfers" ? destinationWarehouseId : null, status: data.status, quantity, due_at: dueAt, notes: data.detail || null }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+  } else if (["receiving", "putaway", "picking"].includes(data.module)) {
+    if (!warehouseId) routeTo(data.module, "Select a warehouse.", "error");
+    ({ error } = await supabase.from("warehouse_tasks").update({ warehouse_id: warehouseId, reference: data.reference, title: data.title, status: data.status, quantity, due_at: dueAt, notes: data.detail || null }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+  } else if (["requisitions", "rfqs", "quotations", "purchase_orders"].includes(data.module)) {
+    ({ error } = await supabase.from("procurement_records").update({ reference: data.reference, title: data.title, supplier_id: relatedId, warehouse_id: warehouseId, status: data.status, amount: quantity, currency: "PHP", due_at: dueAt, notes: data.detail || null }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+  } else if (data.module === "logistics") {
+    ({ error } = await supabase.from("shipments").update({ reference: data.reference, title: data.title, carrier: data.detail || null, warehouse_id: warehouseId, status: data.status, due_at: dueAt }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+  } else if (data.module === "documents") {
+    ({ error } = await supabase.from("documents").update({ reference: data.reference, title: data.title, document_type: data.detail || "general", status: data.status }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+  }
+  if (error) routeTo(data.module, error.message, "error");
+  refresh(data.module);
+  routeTo(data.module, `${moduleConfigs[data.module].singular.replace(/^./, (letter) => letter.toUpperCase())} updated successfully.`);
 }
 
 export async function updateOperationalStatus(formData: FormData) {

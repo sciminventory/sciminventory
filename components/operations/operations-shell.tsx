@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -26,11 +26,24 @@ import {
   Users,
   Warehouse,
   X,
+  CheckCheck,
 } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { cn } from "@/lib/utils";
 import { modulePaths } from "@/lib/operations/modules";
 import { canManageOperationalModule, canViewOperationalModule, hasPermission, type OrganizationRole } from "@/lib/auth/permissions";
+import { markAllInternalNotificationsRead, markInternalNotificationRead, openInternalNotification } from "@/app/(app)/dashboard/notifications/actions";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+
+export type ShellNotification = {
+  id: string;
+  title: string;
+  message: string;
+  href: string | null;
+  readAt: string | null;
+  createdAt: string;
+};
 
 const navigation = [
   { label: "Overview", icon: LayoutDashboard, href: "/dashboard" },
@@ -86,6 +99,9 @@ type Props = {
   userName: string;
   userRole: OrganizationRole | "preview";
   preview?: boolean;
+  organizationId: string | null;
+  notifications: ShellNotification[];
+  unreadNotifications: number;
   logoutAction: () => Promise<void>;
 };
 
@@ -95,9 +111,13 @@ export function OperationsShell({
   userName,
   userRole,
   preview,
+  organizationId,
+  notifications,
+  unreadNotifications,
   logoutAction,
 }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
   const effectiveRole: OrganizationRole = userRole === "preview" ? "owner" : userRole;
   const recruitmentAccess = hasPermission(effectiveRole, "recruitment.read");
   const visibleNavigation = navigation.filter((item) => {
@@ -115,6 +135,27 @@ export function OperationsShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expanded, setExpanded] = useState<string>(currentGroup ?? "Inventory");
   const [collapsed, setCollapsed] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const unreadCount = unreadNotifications;
+
+  useEffect(() => {
+    if (!notificationsOpen) return;
+    const close = (event: MouseEvent) => {
+      if (!notificationsRef.current?.contains(event.target as Node)) setNotificationsOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [notificationsOpen]);
+
+  useEffect(() => {
+    if (!organizationId || preview) return;
+    const client = createClient();
+    const channel = client.channel(`internal-notifications:${organizationId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `organization_id=eq.${organizationId}` }, () => router.refresh())
+      .subscribe();
+    return () => { void client.removeChannel(channel); };
+  }, [organizationId, preview, router]);
 
   return (
     <div className="operations-app min-h-screen bg-[#f4f7fb] text-ink">
@@ -298,10 +339,27 @@ export function OperationsShell({
               <Plus size={14} />
               Quick create
             </Link>}
-            <Link href="/dashboard" aria-label="Open attention queue" className="relative grid size-9 place-items-center rounded-lg border border-line bg-white">
-              <Bell size={15} />
-              <i className="absolute right-2 top-2 size-1.5 rounded-full bg-red-500" />
-            </Link>
+            <div ref={notificationsRef} className="relative">
+              <button type="button" onClick={() => setNotificationsOpen((open) => !open)} aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} aria-expanded={notificationsOpen} className="relative grid size-9 place-items-center rounded-lg border border-line bg-white transition hover:bg-blue-50 hover:text-blue-700">
+                <Bell size={15} />
+                {unreadCount > 0 && <span className="absolute -right-1 -top-1 grid min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-4 text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+              </button>
+              {notificationsOpen && (
+                <div className="absolute right-0 top-12 z-50 w-[min(380px,calc(100vw-24px))] overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_70px_rgba(7,23,45,.2)]">
+                  <div className="flex items-center justify-between border-b border-line px-4 py-3">
+                    <div><p className="text-sm font-bold">Notifications</p><p className="text-xs text-muted">{unreadCount ? `${unreadCount} unread update${unreadCount === 1 ? "" : "s"}` : "You are all caught up"}</p></div>
+                    {organizationId && unreadCount > 0 && <form action={markAllInternalNotificationsRead}><input type="hidden" name="organizationId" value={organizationId} /><button className="flex items-center gap-1 text-xs font-semibold text-blue-700"><CheckCheck size={13} /> Mark all read</button></form>}
+                  </div>
+                  <div className="max-h-[min(460px,70vh)] overflow-y-auto">
+                    {notifications.length ? notifications.map((notice) => (
+                      <div key={notice.id} className={`border-b border-line p-4 last:border-0 ${notice.readAt ? "bg-white" : "bg-blue-50/60"}`}>
+                        <div className="flex gap-3"><span className={`mt-1 size-2 shrink-0 rounded-full ${notice.readAt ? "bg-slate-300" : "bg-blue-600"}`} /><div className="min-w-0 flex-1"><p className="text-sm font-bold text-ink">{notice.title}</p><p className="mt-1 text-sm leading-5 text-muted">{notice.message}</p><div className="mt-2 flex items-center justify-between gap-3"><span className="text-xs text-muted">{formatNotificationTime(notice.createdAt)}</span><div className="flex items-center gap-3">{notice.href && organizationId && <form action={openInternalNotification}><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="notificationId" value={notice.id} /><button onClick={() => setNotificationsOpen(false)} className="text-xs font-bold text-blue-700">Open</button></form>}{!notice.readAt && organizationId && <form action={markInternalNotificationRead}><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="notificationId" value={notice.id} /><button className="text-xs font-semibold text-muted hover:text-blue-700">Mark read</button></form>}</div></div></div></div>
+                      </div>
+                    )) : <div className="px-6 py-10 text-center"><Bell className="mx-auto text-slate-300" size={24} /><p className="mt-3 text-sm font-bold">No notifications yet</p><p className="mt-1 text-sm text-muted">Transaction and workflow updates will appear here.</p></div>}
+                  </div>
+                </div>
+              )}
+            </div>
             <Link href="/dashboard/administration#warehouses" className="hidden h-9 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold md:flex">
               <Building2 size={14} />
               Warehouses
@@ -320,4 +378,13 @@ export function OperationsShell({
       )}
     </div>
   );
+}
+
+function formatNotificationTime(value: string) {
+  const date = new Date(value);
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  if (seconds < 60) return "Just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(date);
 }

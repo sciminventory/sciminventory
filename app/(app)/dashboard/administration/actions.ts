@@ -72,6 +72,12 @@ const assignmentSchema = z.object({
   operation: z.enum(["assign", "remove"]),
 });
 
+const resetWorkspaceSchema = z.object({
+  organizationId: organizationIdSchema,
+  confirmationName: z.string().trim().min(2).max(100),
+  acknowledgePermanentDeletion: z.literal("on"),
+});
+
 function go(message: string, tone: "success" | "error" = "success"): never {
   redirect(`/dashboard/administration?${tone}=${encodeURIComponent(message)}`);
 }
@@ -239,4 +245,125 @@ export async function setWarehouseAssignment(formData: FormData) {
       ? "Warehouse access assigned."
       : "Warehouse access removed.",
   );
+}
+
+export async function resetWorkspaceData(formData: FormData) {
+  const result = resetWorkspaceSchema.safeParse(Object.fromEntries(formData));
+  if (!result.success) {
+    go(
+      "Confirm permanent deletion and enter the exact organization name.",
+      "error",
+    );
+  }
+
+  const { supabase } = await requireOwner(result.data.organizationId);
+  const organization = await supabase
+    .from("organizations")
+    .select("name")
+    .eq("id", result.data.organizationId)
+    .single();
+  if (organization.error || !organization.data) {
+    go("The organization could not be verified.", "error");
+  }
+  if (organization.data.name !== result.data.confirmationName) {
+    go("The organization name does not match.", "error");
+  }
+
+  const [organizationFiles, recruitmentFiles] = await Promise.all([
+    listStoredFiles(
+      supabase,
+      "organization-documents",
+      result.data.organizationId,
+    ),
+    listStoredFiles(
+      supabase,
+      "recruitment-documents",
+      result.data.organizationId,
+    ),
+  ]);
+  const storageInventoryError =
+    organizationFiles.error ?? recruitmentFiles.error;
+  if (storageInventoryError) {
+    go(
+      `Workspace file inventory could not be prepared: ${storageInventoryError}`,
+      "error",
+    );
+  }
+
+  const reset = await supabase.rpc("reset_organization_data", {
+    target_organization_id: result.data.organizationId,
+    confirmed_organization_name: result.data.confirmationName,
+  });
+  if (reset.error) go(reset.error.message, "error");
+
+  const storageErrors = (
+    await Promise.all([
+      removeStoredFiles(
+        supabase,
+        "organization-documents",
+        organizationFiles.paths,
+      ),
+      removeStoredFiles(
+        supabase,
+        "recruitment-documents",
+        recruitmentFiles.paths,
+      ),
+    ])
+  ).filter(Boolean);
+
+  revalidatePath("/", "layout");
+  if (storageErrors.length) {
+    go(
+      `Workspace data was reset, but some stored files require manual cleanup: ${storageErrors.join(" ")}`,
+      "error",
+    );
+  }
+  go(
+    `Workspace reset completed. ${Number(reset.data ?? 0).toLocaleString()} records were removed; organization access and audit history were preserved.`,
+  );
+}
+
+async function listStoredFiles(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  bucket: string,
+  root: string,
+): Promise<{ paths: string[]; error: string | null }> {
+  const paths: string[] = [];
+  const folders = [root];
+
+  while (folders.length) {
+    const folder = folders.shift()!;
+    for (let offset = 0; ; offset += 100) {
+      const listing = await supabase.storage.from(bucket).list(folder, {
+        limit: 100,
+        offset,
+        sortBy: { column: "name", order: "asc" },
+      });
+      if (listing.error)
+        return { paths, error: `${bucket}: ${listing.error.message}` };
+
+      for (const item of listing.data ?? []) {
+        const path = `${folder}/${item.name}`;
+        if (item.id) paths.push(path);
+        else folders.push(path);
+      }
+      if ((listing.data?.length ?? 0) < 100) break;
+    }
+  }
+
+  return { paths, error: null };
+}
+
+async function removeStoredFiles(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  bucket: string,
+  paths: string[],
+) {
+  for (let offset = 0; offset < paths.length; offset += 100) {
+    const removal = await supabase.storage
+      .from(bucket)
+      .remove(paths.slice(offset, offset + 100));
+    if (removal.error) return `${bucket}: ${removal.error.message}`;
+  }
+  return null;
 }

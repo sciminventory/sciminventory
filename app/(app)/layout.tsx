@@ -14,6 +14,9 @@ export default async function AppLayout({
   let workspaceName = "Northstar Distribution";
   let userName = "Maria Santos";
   let userRole: OrganizationRole | "preview" = "preview";
+  let organizationId: string | null = null;
+  let notifications: Array<{ id: string; title: string; message: string; href: string | null; readAt: string | null; createdAt: string }> = [];
+  let unreadNotifications = 0;
   const preview = !hasSupabaseEnv();
 
   if (!preview) {
@@ -33,6 +36,7 @@ export default async function AppLayout({
       .limit(1)
       .maybeSingle();
     if (membership) {
+      organizationId = membership.organization_id;
       userRole = membership.role;
       if (roleRequiresMfa(membership.role)) await requireMfaSession(supabase);
       const { data: organization } = await supabase
@@ -41,6 +45,30 @@ export default async function AppLayout({
         .eq("id", membership.organization_id)
         .single();
       if (organization) workspaceName = organization.name;
+      const [{ data: notificationRows }, { count: unreadCount }] = await Promise.all([
+        supabase
+          .from("notifications")
+          .select("id, title, message, href, read_at, created_at")
+          .eq("organization_id", membership.organization_id)
+          .eq("audience", "internal")
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase
+          .from("notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", membership.organization_id)
+          .eq("audience", "internal")
+          .is("read_at", null),
+      ]);
+      unreadNotifications = unreadCount ?? 0;
+      notifications = (notificationRows ?? []).map((notice) => ({
+        id: notice.id,
+        title: notice.title,
+        message: notice.message,
+        href: notice.href,
+        readAt: notice.read_at,
+        createdAt: notice.created_at,
+      }));
     }
   }
 
@@ -50,6 +78,9 @@ export default async function AppLayout({
       userName={userName}
       userRole={userRole}
       preview={preview}
+      organizationId={organizationId}
+      notifications={notifications}
+      unreadNotifications={unreadNotifications}
       logoutAction={logout}
     >
       {children}

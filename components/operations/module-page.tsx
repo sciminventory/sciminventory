@@ -12,12 +12,13 @@ import {
   Plus,
   Search,
   Download,
+  Pencil,
   X,
 } from "lucide-react";
 import { AdminActionButton } from "@/components/operations/admin-action-button";
 import { ScrollReveal } from "@/components/motion/scroll-motion";
 import { ToastNotification } from "@/components/ui/toast-notification";
-import { createOperationalItem, downloadDocument, updateOperationalStatus } from "@/app/(app)/dashboard/[...segments]/actions";
+import { createOperationalItem, downloadDocument, updateOperationalItem, updateOperationalStatus } from "@/app/(app)/dashboard/[...segments]/actions";
 import { modulePaths, type ModuleConfig } from "@/lib/operations/modules";
 import { formatPhpCurrency } from "@/lib/utils";
 
@@ -26,15 +27,19 @@ export type OperationalItem = {
   reference: string;
   title: string;
   detail: string;
+  editDetail?: string;
   status: string;
   quantity: number | null;
   dueAt: string | null;
   createdAt: string;
   warehouse: string | null;
+  warehouseId?: string | null;
+  destinationWarehouseId?: string | null;
+  relatedId?: string | null;
   immutable?: boolean;
 };
 
-export type ModuleOption = { id: string; code: string; name: string };
+export type ModuleOption = { id: string; code: string; name: string; warehouseId?: string };
 
 type Props = {
   config: ModuleConfig;
@@ -44,6 +49,7 @@ type Props = {
   warehouses: ModuleOption[];
   products: ModuleOption[];
   suppliers: ModuleOption[];
+  locations: ModuleOption[];
   canManage: boolean;
   success?: string;
   error?: string;
@@ -57,6 +63,7 @@ const labelClass = "mb-2 block font-mono text-xs font-medium uppercase tracking-
 
 export function ModulePage({ config, ...props }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(Boolean(props.openCreate));
+  const [editingItem, setEditingItem] = useState<OperationalItem | null>(null);
   const filtered = props.query
     ? props.items.filter((item) => `${item.reference} ${item.title} ${item.detail}`.toLowerCase().includes(props.query!.toLowerCase()))
     : props.items;
@@ -92,7 +99,7 @@ export function ModulePage({ config, ...props }: Props) {
             Post movement <ArrowRight size={13} />
           </Link>
         ) : props.canManage ? (
-          <button type="button" onClick={() => setDrawerOpen(true)} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-bold text-white hover:bg-blue-700 sm:w-auto">
+          <button type="button" onClick={() => { setEditingItem(null); setDrawerOpen(true); }} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-bold text-white hover:bg-blue-700 sm:w-auto">
             <Plus size={14} /> {config.createLabel}
           </button>
         ) : (
@@ -136,7 +143,7 @@ export function ModulePage({ config, ...props }: Props) {
           </div>
         ) : (
           <><div className="divide-y divide-line md:hidden">
-            {filtered.map((item) => <ItemCard key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} />)}
+            {filtered.map((item) => <ItemCard key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} onEdit={() => { setEditingItem(item); setDrawerOpen(true); }} />)}
           </div>
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[820px] text-left">
@@ -144,7 +151,7 @@ export function ModulePage({ config, ...props }: Props) {
                 <tr><th className="px-5 py-3 font-medium">Reference</th><th className="px-5 py-3 font-medium">Record</th><th className="px-5 py-3 font-medium">Warehouse / context</th><th className="px-5 py-3 font-medium">{config.quantityLabel ?? "Quantity"}</th><th className="px-5 py-3 font-medium">Created / due</th><th className="px-5 py-3 font-medium">Status / action</th></tr>
               </thead>
               <tbody>
-                {filtered.map((item) => <ItemRow key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} />)}
+                {filtered.map((item) => <ItemRow key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} onEdit={() => { setEditingItem(item); setDrawerOpen(true); }} />)}
               </tbody>
             </table>
           </div></>
@@ -167,7 +174,7 @@ export function ModulePage({ config, ...props }: Props) {
             <motion.aside
               role="dialog"
               aria-modal="true"
-              aria-labelledby="create-drawer-title"
+              aria-labelledby="record-drawer-title"
               className="fixed inset-y-0 right-0 z-[80] flex h-dvh w-full flex-col border-l border-line bg-[#f8faff] shadow-[-24px_0_70px_rgba(7,23,45,.18)] sm:max-w-[580px]"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -177,13 +184,13 @@ export function ModulePage({ config, ...props }: Props) {
               <div className="flex items-start gap-3 border-b border-line bg-white px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
                 <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-accent"><PackageOpen size={19} /></span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-xs uppercase tracking-[.1em] text-blue-700">Create record</p>
-                  <h2 id="create-drawer-title" className="mt-1 text-xl font-bold tracking-[-.035em]">New {config.singular}</h2>
+                  <p className="font-mono text-xs uppercase tracking-[.1em] text-blue-700">{editingItem ? "Edit record" : "Create record"}</p>
+                  <h2 id="record-drawer-title" className="mt-1 text-xl font-bold tracking-[-.035em]">{editingItem ? `Edit ${config.singular}` : `New ${config.singular}`}</h2>
                   <p className="mt-1 text-sm text-muted">Validated and securely scoped to your organization.</p>
                 </div>
                 <button type="button" onClick={() => setDrawerOpen(false)} className="grid size-10 shrink-0 place-items-center rounded-xl border border-line text-muted transition hover:bg-blue-50 hover:text-accent" aria-label="Close drawer"><X size={17} /></button>
               </div>
-              <CreateForm config={config} organizationId={props.organizationId} warehouses={props.warehouses} products={props.products} suppliers={props.suppliers} />
+              <RecordForm item={editingItem} config={config} organizationId={props.organizationId} warehouses={props.warehouses} products={props.products} suppliers={props.suppliers} locations={props.locations} />
             </motion.aside>
           </>
         )}
@@ -192,36 +199,41 @@ export function ModulePage({ config, ...props }: Props) {
   );
 }
 
-function CreateForm({ config, organizationId, warehouses, products, suppliers }: { config: ModuleConfig; organizationId: string; warehouses: ModuleOption[]; products: ModuleOption[]; suppliers: ModuleOption[] }) {
+function RecordForm({ item, config, organizationId, warehouses, products, suppliers, locations }: { item: OperationalItem | null; config: ModuleConfig; organizationId: string; warehouses: ModuleOption[]; products: ModuleOption[]; suppliers: ModuleOption[]; locations: ModuleOption[] }) {
   const relatedOptions = config.needsProduct ? products : config.needsSupplier ? suppliers : [];
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState(item?.warehouseId ?? "");
+  const availableLocations = locations.filter((location) => location.warehouseId === selectedWarehouseId);
   return (
-    <form action={createOperationalItem} className="flex min-h-0 flex-1 flex-col">
+    <form action={item ? updateOperationalItem : createOperationalItem} className="flex min-h-0 flex-1 flex-col">
       <div className="grid flex-1 content-start gap-5 overflow-y-auto p-4 sm:grid-cols-2 sm:p-6">
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="module" value={config.key} />
-      <Field label={config.referenceLabel} name="reference" placeholder={referencePlaceholder(config.key)} />
-      {config.key === "movements" ? <input type="hidden" name="title" value="Inventory movement" /> : <Field label={config.titleLabel} name="title" placeholder={`Enter ${config.titleLabel.toLowerCase()}`} />}
-      {config.needsWarehouse && <Select label={config.key === "transfers" ? "Source warehouse" : "Warehouse"} name="warehouseId" options={warehouses} required />}
-      {config.needsSecondWarehouse && <Select label="Destination warehouse" name="destinationWarehouseId" options={warehouses} required />}
+      {item && <input type="hidden" name="itemId" value={item.id} />}
+      <Field label={config.referenceLabel} name="reference" defaultValue={item?.reference} placeholder={referencePlaceholder(config.key)} />
+      {config.key === "movements" ? <input type="hidden" name="title" value="Inventory movement" /> : <Field label={config.titleLabel} name="title" defaultValue={item?.title} placeholder={`Enter ${config.titleLabel.toLowerCase()}`} />}
+      {config.needsWarehouse && <Select label={config.key === "transfers" ? "Source warehouse" : "Warehouse"} name="warehouseId" options={warehouses} value={selectedWarehouseId} onChange={(event) => setSelectedWarehouseId(event.target.value)} required />}
+      {config.key === "movements" && <Select label="Warehouse location" name="locationId" options={availableLocations} required />}
+      {config.key !== "movements" && <input type="hidden" name="locationId" value="" />}
+      {config.needsSecondWarehouse && <Select label="Destination warehouse" name="destinationWarehouseId" options={warehouses} defaultValue={item?.destinationWarehouseId ?? ""} required />}
       {!config.needsSecondWarehouse && <input type="hidden" name="destinationWarehouseId" value="" />}
-      {(config.needsProduct || config.needsSupplier) && <Select label={config.needsProduct ? "Product" : "Supplier"} name="relatedId" options={relatedOptions} required={config.needsProduct} />}
+      {(config.needsProduct || config.needsSupplier) && <Select label={config.needsProduct ? "Product" : "Supplier"} name="relatedId" options={relatedOptions} defaultValue={item?.relatedId ?? ""} required={config.needsProduct} />}
       {!config.needsProduct && !config.needsSupplier && <input type="hidden" name="relatedId" value="" />}
-      <label><span className={labelClass}>{config.key === "locations" ? "Location type" : config.key === "movements" ? "Movement type" : "Initial status"}</span><select name="status" className={fieldClass}>{config.statusOptions.map((status) => <option key={status} value={status}>{humanize(status)}</option>)}</select></label>
-      {config.quantityLabel ? <Field label={config.quantityLabel} name="quantity" type="number" step="0.0001" min={config.key === "movements" ? undefined : 0} placeholder="0" required={config.key === "movements"} /> : <input type="hidden" name="quantity" value="" />}
-      {!["products", "suppliers", "locations", "movements", "documents"].includes(config.key) && <Field label="Due date" name="dueAt" type="datetime-local" />}
+      <label><span className={labelClass}>{config.key === "locations" ? "Location type" : config.key === "movements" ? "Movement type" : item ? "Status" : "Initial status"}</span><select name="status" defaultValue={item?.status} className={fieldClass}>{config.statusOptions.map((status) => <option key={status} value={status}>{humanize(status)}</option>)}</select></label>
+      {config.quantityLabel && config.key !== "locations" ? <Field label={config.quantityLabel} name="quantity" type="number" step="0.0001" min={config.key === "movements" ? undefined : 0} defaultValue={item?.quantity ?? undefined} placeholder="0" required={config.key === "movements"} /> : <input type="hidden" name="quantity" value="" />}
+      {!["products", "suppliers", "locations", "movements", "documents"].includes(config.key) && <Field label="Due date" name="dueAt" type="datetime-local" defaultValue={toDateTimeLocal(item?.dueAt)} />}
       {["products", "suppliers", "locations", "movements", "documents"].includes(config.key) && <input type="hidden" name="dueAt" value="" />}
-      <Field label={config.detailLabel ?? "Notes"} name="detail" type={config.key === "suppliers" ? "email" : "text"} placeholder={`Enter ${(config.detailLabel ?? "notes").toLowerCase()}`} />
-      {config.key === "documents" && <label className="sm:col-span-2"><span className={labelClass}>File · max 25 MB</span><input required type="file" name="file" className="block h-10 w-full rounded-lg border border-line bg-white text-sm file:mr-3 file:h-full file:border-0 file:border-r file:border-line file:bg-blue-50 file:px-3 file:text-sm file:font-bold file:text-blue-700" /></label>}
+      <Field label={config.detailLabel ?? "Notes"} name="detail" type={config.key === "suppliers" ? "email" : "text"} defaultValue={item?.editDetail ?? item?.detail} placeholder={`Enter ${(config.detailLabel ?? "notes").toLowerCase()}`} />
+      {config.key === "documents" && !item && <label className="sm:col-span-2"><span className={labelClass}>File · max 25 MB</span><input required type="file" name="file" className="block h-10 w-full rounded-lg border border-line bg-white text-sm file:mr-3 file:h-full file:border-0 file:border-r file:border-line file:bg-blue-50 file:px-3 file:text-sm file:font-bold file:text-blue-700" /></label>}
       </div>
       <div className="border-t border-line bg-white p-5">
-        <AdminActionButton className="h-11 w-full"><FileUp size={14} /> {config.createLabel}</AdminActionButton>
+        <AdminActionButton className="h-11 w-full">{item ? <Pencil size={14} /> : <FileUp size={14} />} {item ? "Save changes" : config.createLabel}</AdminActionButton>
         <p className="mt-3 text-center text-xs text-muted">This action will be recorded in the workspace audit history.</p>
       </div>
     </form>
   );
 }
 
-function ItemCard({ item, config, organizationId, canManage }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean }) {
+function ItemCard({ item, config, organizationId, canManage, onEdit }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean; onEdit: () => void }) {
   return (
     <article className="p-4">
       <div className="flex items-start justify-between gap-3">
@@ -238,12 +250,12 @@ function ItemCard({ item, config, organizationId, canManage }: { item: Operation
         <div><dt className="text-muted">Created</dt><dd className="mt-1 font-mono font-semibold">{formatDate(item.createdAt)}</dd></div>
         <div><dt className="text-muted">Due</dt><dd className="mt-1 font-mono font-semibold">{item.dueAt ? formatDate(item.dueAt) : "Not set"}</dd></div>
       </dl>
-      {(canManage || config.key === "documents") && <div className="mt-4"><ItemActions item={item} config={config} organizationId={organizationId} canManage={canManage} mobile /></div>}
+      {(canManage || config.key === "documents") && <div className="mt-4"><ItemActions item={item} config={config} organizationId={organizationId} canManage={canManage} onEdit={onEdit} mobile /></div>}
     </article>
   );
 }
 
-function ItemRow({ item, config, organizationId, canManage }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean }) {
+function ItemRow({ item, config, organizationId, canManage, onEdit }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean; onEdit: () => void }) {
   return (
     <tr className="border-b border-line text-sm last:border-0">
       <td className="px-5 py-4 font-mono font-medium text-blue-700">{item.reference}</td>
@@ -252,13 +264,13 @@ function ItemRow({ item, config, organizationId, canManage }: { item: Operationa
       <td className="px-5 py-4 font-mono">{item.quantity === null ? "—" : formatOperationalValue(item.quantity, config)}</td>
       <td className="px-5 py-4"><p className="font-mono text-xs">{formatDate(item.createdAt)}</p>{item.dueAt && <p className="mt-1 text-xs text-muted">Due {formatDate(item.dueAt)}</p>}</td>
       <td className="px-5 py-3">
-        <ItemActions item={item} config={config} organizationId={organizationId} canManage={canManage} />
+        <ItemActions item={item} config={config} organizationId={organizationId} canManage={canManage} onEdit={onEdit} />
       </td>
     </tr>
   );
 }
 
-function ItemActions({ item, config, organizationId, canManage, mobile = false }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean; mobile?: boolean }) {
+function ItemActions({ item, config, organizationId, canManage, onEdit, mobile = false }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean; onEdit: () => void; mobile?: boolean }) {
   return (
     <div className={`flex items-center gap-2 ${mobile ? "flex-wrap" : ""}`}>
       {!item.immutable && canManage && config.statusOptions.length ? (
@@ -268,13 +280,14 @@ function ItemActions({ item, config, organizationId, canManage, mobile = false }
           <AdminActionButton variant="secondary" className="h-10 px-3">Save</AdminActionButton>
         </form>
       ) : mobile ? null : <StatusBadge status={item.status} />}
+      {!item.immutable && canManage && <button type="button" onClick={onEdit} className={`inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-bold text-ink transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 ${mobile ? "flex-1" : ""}`}><Pencil size={12} /> Edit</button>}
       {config.key === "documents" && <form action={downloadDocument} className={mobile ? "w-full" : ""}><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="itemId" value={item.id} /><AdminActionButton variant="secondary" className={`h-10 px-3 ${mobile ? "w-full" : ""}`}><Download size={11} /> Download</AdminActionButton></form>}
     </div>
   );
 }
 
 function Field(props: React.InputHTMLAttributes<HTMLInputElement> & { label: string; name: string }) { const { label, ...rest } = props; return <label><span className={labelClass}>{label}</span><input className={fieldClass} {...rest} /></label>; }
-function Select({ label, name, options, required }: { label: string; name: string; options: ModuleOption[]; required?: boolean }) { return <label><span className={labelClass}>{label}</span><select name={name} required={required} className={fieldClass}><option value="">{required ? "Select one" : "None"}</option>{options.map((option) => <option key={option.id} value={option.id}>{option.code} · {option.name}</option>)}</select></label>; }
+function Select({ label, name, options, required, defaultValue, value, onChange }: { label: string; name: string; options: ModuleOption[]; required?: boolean; defaultValue?: string; value?: string; onChange?: React.ChangeEventHandler<HTMLSelectElement> }) { return <label><span className={labelClass}>{label}</span><select name={name} required={required} defaultValue={value === undefined ? defaultValue : undefined} value={value} onChange={onChange} className={fieldClass}><option value="">{required ? "Select one" : "None"}</option>{options.map((option) => <option key={option.id} value={option.id}>{option.code} · {option.name}</option>)}</select></label>; }
 function Metric({ label, value, detail }: { label: string; value: string; detail: string }) { return <div className="border-b border-r border-line p-5"><p className="text-sm font-semibold text-muted">{label}</p><p className="mt-3 text-2xl font-bold tracking-[-.04em]">{value}</p><p className="mt-1 text-xs text-muted">{detail}</p></div>; }
 function StatusBadge({ status }: { status: string }) { const danger = ["cancelled", "rejected", "exception", "inactive"].includes(status); const done = ["completed", "delivered", "verified", "active"].includes(status); return <span className={`rounded-full px-2 py-1 font-mono text-xs ${danger ? "bg-red-50 text-red-700" : done ? "bg-blue-50 text-blue-700" : "bg-amber-50 text-amber-800"}`}>{humanize(status).toUpperCase()}</span>; }
 function humanize(value: string) { return value.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase()); }
@@ -282,4 +295,5 @@ function formatNumber(value: number) { return new Intl.NumberFormat("en", { maxi
 function formatOperationalValue(value: number, config: ModuleConfig) { return isProcurement(config) ? formatPhpCurrency(value) : formatNumber(value); }
 function isProcurement(config: ModuleConfig) { return ["requisitions", "rfqs", "quotations", "purchase_orders"].includes(config.key); }
 function formatDate(value: string) { return new Intl.DateTimeFormat("en", { month: "short", day: "2-digit", year: "numeric" }).format(new Date(value)); }
+function toDateTimeLocal(value?: string | null) { if (!value) return undefined; const date = new Date(value); const offset = date.getTimezoneOffset() * 60_000; return new Date(date.getTime() - offset).toISOString().slice(0, 16); }
 function referencePlaceholder(key: string) { const prefixes: Record<string, string> = { products: "SKU-001", suppliers: "SUP-001", locations: "A-01-01", movements: "GRN-0001", transfers: "TR-0001", cycle_counts: "CC-0001", receiving: "RCV-0001", putaway: "PUT-0001", picking: "PICK-0001", requisitions: "PR-0001", rfqs: "RFQ-0001", quotations: "QT-0001", purchase_orders: "PO-0001", logistics: "SHP-0001", documents: "DOC-0001" }; return prefixes[key] ?? "REF-0001"; }

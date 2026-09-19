@@ -43,6 +43,7 @@ export default async function AdministrationPage({
     warehousesResult,
     assignmentsResult,
     auditResult,
+    balancesResult,
   ] = await Promise.all([
     supabase
       .from("organizations")
@@ -69,6 +70,10 @@ export default async function AdministrationPage({
       .eq("organization_id", membership.organization_id)
       .order("occurred_at", { ascending: false })
       .limit(30),
+    supabase
+      .from("inventory_balances")
+      .select("warehouse_id, product_id, on_hand, reserved")
+      .eq("organization_id", membership.organization_id),
   ]);
 
   if (organizationResult.error || !organizationResult.data) {
@@ -114,6 +119,14 @@ export default async function AdministrationPage({
     };
   });
 
+  const warehouseInventory = new Map<string, { onHand: number; reserved: number; products: Set<string> }>();
+  for (const balance of balancesResult.data ?? []) {
+    const totals = warehouseInventory.get(balance.warehouse_id) ?? { onHand: 0, reserved: 0, products: new Set<string>() };
+    totals.onHand += Number(balance.on_hand);
+    totals.reserved += Number(balance.reserved);
+    totals.products.add(balance.product_id);
+    warehouseInventory.set(balance.warehouse_id, totals);
+  }
   const warehouses: AdminWarehouse[] = (warehousesResult.data ?? []).map(
     (item) => ({
       id: item.id,
@@ -122,6 +135,9 @@ export default async function AdministrationPage({
       city: item.city,
       countryCode: item.country_code,
       isActive: item.is_active,
+      onHand: warehouseInventory.get(item.id)?.onHand ?? 0,
+      reserved: warehouseInventory.get(item.id)?.reserved ?? 0,
+      stockedProducts: warehouseInventory.get(item.id)?.products.size ?? 0,
     }),
   );
   const assignments: AdminAssignment[] = (assignmentsResult.data ?? []).map(
