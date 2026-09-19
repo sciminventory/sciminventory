@@ -6,8 +6,6 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowRight,
   Boxes,
-  CheckCircle2,
-  CircleAlert,
   FileUp,
   Filter,
   PackageOpen,
@@ -18,6 +16,7 @@ import {
 } from "lucide-react";
 import { AdminActionButton } from "@/components/operations/admin-action-button";
 import { ScrollReveal } from "@/components/motion/scroll-motion";
+import { ToastNotification } from "@/components/ui/toast-notification";
 import { createOperationalItem, downloadDocument, updateOperationalStatus } from "@/app/(app)/dashboard/[...segments]/actions";
 import { modulePaths, type ModuleConfig } from "@/lib/operations/modules";
 import { formatPhpCurrency } from "@/lib/utils";
@@ -102,12 +101,11 @@ export function ModulePage({ config, ...props }: Props) {
       </header>
       </ScrollReveal>
 
-      {(props.success || props.error || props.setupError) && (
-        <div role="status" className={`mt-6 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${props.error || props.setupError ? "border-red-200 bg-red-50 text-red-800" : "border-blue-200 bg-blue-50 text-blue-800"}`}>
-          {props.error || props.setupError ? <CircleAlert className="mt-0.5 shrink-0" size={15} /> : <CheckCircle2 className="mt-0.5 shrink-0" size={15} />}
-          <span>{props.error ?? props.setupError ?? props.success}</span>
-        </div>
-      )}
+      <ToastNotification
+        success={props.success}
+        error={props.error}
+        setupError={props.setupError}
+      />
 
       <ScrollReveal className="mt-6" distance={16}>
       <div className="grid overflow-hidden rounded-2xl border border-line bg-white shadow-[0_14px_40px_rgba(25,72,133,.055)] sm:grid-cols-3">

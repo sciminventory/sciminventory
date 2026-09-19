@@ -25,7 +25,7 @@ The control-tower charts and recruitment workspaces read live tenant data and re
 
 1. Install dependencies with `npm install`.
 2. Copy `.env.example` to `.env.local` and add your Supabase project URL and publishable/anon key. Add the server-only service-role key to enable owner invitations.
-3. Apply every SQL file in `supabase/migrations` in filename order. Recruitment, RBAC, MFA, PHP currency defaults, and complete vendor lifecycle support require migrations `005` through `015` after the existing operations migrations.
+3. Apply every SQL file in `supabase/migrations` in filename order. Recruitment, RBAC, MFA, PHP currency defaults, and complete vendor lifecycle support require migrations `005` through `016` after the existing operations migrations.
 4. Add `http://localhost:3000/auth/callback`, `http://localhost:3000/auth/invite`, and `http://localhost:3000/auth/vendor-invite` to the allowed redirect URLs in your authentication provider.
 5. Create the screening environment and install its dependencies:
 

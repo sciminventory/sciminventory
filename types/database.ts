@@ -1437,6 +1437,7 @@ export type Database = {
           job_id: string;
           applicant_id: string;
           stage: Database["public"]["Enums"]["application_stage"];
+          outcome: Database["public"]["Enums"]["application_outcome"];
           application_reference: string;
           cover_letter: string | null;
           submission_channel: string;
@@ -1457,6 +1458,7 @@ export type Database = {
           job_id: string;
           applicant_id: string;
           stage?: Database["public"]["Enums"]["application_stage"];
+          outcome?: Database["public"]["Enums"]["application_outcome"];
           application_reference?: string;
           cover_letter?: string | null;
           submission_channel?: string;
@@ -1472,6 +1474,7 @@ export type Database = {
         };
         Update: {
           stage?: Database["public"]["Enums"]["application_stage"];
+          outcome?: Database["public"]["Enums"]["application_outcome"];
           application_reference?: string;
           cover_letter?: string | null;
           submission_channel?: string;
@@ -1819,14 +1822,8 @@ export type Database = {
         "requisition" | "rfq" | "quotation" | "purchase_order";
       job_status: "draft" | "open" | "paused" | "closed" | "archived";
       application_stage:
-        | "applied"
-        | "screening"
-        | "shortlisted"
-        | "interview"
-        | "offer"
-        | "hired"
-        | "rejected"
-        | "withdrawn";
+        "applied" | "initial_review" | "ai_screening" | "interview" | "hired";
+      application_outcome: "active" | "hired" | "rejected" | "withdrawn";
       screening_run_status: "processing" | "completed" | "failed";
     };
     CompositeTypes: Record<string, never>;

@@ -4,6 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { sendRecruitmentStageEmail } from "@/lib/email/recruitment-stage-email";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { validateResumeFile } from "@/lib/recruitment/resume-files";
 
@@ -65,7 +66,7 @@ export async function submitPublicApplication(
 
   const job = await admin
     .from("job_openings")
-    .select("id, organization_id, status")
+    .select("id, organization_id, status, title")
     .eq("id", data.jobId)
     .eq("organization_id", data.organizationId)
     .eq("status", "open")
@@ -156,6 +157,19 @@ export async function submitPublicApplication(
     if (createdApplicant) await admin.from("applicants").delete().eq("id", applicantId);
     return { status: "error", message: "Your application could not be submitted. Please try again." };
   }
+
+  const notification = await sendRecruitmentStageEmail({
+    applicationId,
+    applicationReference,
+    applicantName: data.fullName,
+    applicantEmail: data.email,
+    jobTitle: job.data.title,
+    stage: "applied",
+  });
+  if (!notification.sent)
+    console.error(
+      `Application ${applicationReference} was saved without an email confirmation: ${notification.reason}`,
+    );
 
   revalidatePath("/careers");
   revalidatePath("/dashboard/recruitment", "layout");

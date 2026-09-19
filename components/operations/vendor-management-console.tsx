@@ -5,12 +5,10 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import {
   AlertTriangle,
-  BadgeCheck,
   Banknote,
   Boxes,
   Building2,
   ChevronRight,
-  CircleAlert,
   ClipboardCheck,
   FileCheck2,
   Gauge,
@@ -30,6 +28,7 @@ import {
 } from "lucide-react";
 import { AdminActionButton } from "@/components/operations/admin-action-button";
 import { ScrollReveal } from "@/components/motion/scroll-motion";
+import { ToastNotification } from "@/components/ui/toast-notification";
 import { VendorRealtimeSync } from "@/components/vendor/vendor-realtime-sync";
 import {
   addPurchaseOrderLine,
@@ -215,18 +214,11 @@ export function VendorManagementConsole(props: Props) {
         </header>
       </ScrollReveal>
 
-      {(props.success || props.error || props.setupError) && (
-        <div
-          className={`mt-6 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${props.error || props.setupError ? "border-red-200 bg-red-50 text-red-800" : "border-blue-200 bg-blue-50 text-blue-800"}`}
-        >
-          {props.error || props.setupError ? (
-            <CircleAlert size={16} />
-          ) : (
-            <BadgeCheck size={16} />
-          )}
-          <span>{props.error ?? props.setupError ?? props.success}</span>
-        </div>
-      )}
+      <ToastNotification
+        success={props.success}
+        error={props.error}
+        setupError={props.setupError}
+      />
 
       <ScrollReveal className="mt-6">
         <div className="grid overflow-hidden rounded-2xl border border-line bg-white shadow-sm sm:grid-cols-2 xl:grid-cols-4">
