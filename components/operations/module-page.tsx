@@ -13,6 +13,7 @@ import {
   Search,
   Download,
   Pencil,
+  Sparkles,
   X,
 } from "lucide-react";
 import { AdminActionButton } from "@/components/operations/admin-action-button";
@@ -50,6 +51,7 @@ type Props = {
   products: ModuleOption[];
   suppliers: ModuleOption[];
   locations: ModuleOption[];
+  createReference: string;
   canManage: boolean;
   success?: string;
   error?: string;
@@ -65,7 +67,7 @@ export function ModulePage({ config, ...props }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(Boolean(props.openCreate));
   const [editingItem, setEditingItem] = useState<OperationalItem | null>(null);
   const filtered = props.query
-    ? props.items.filter((item) => `${item.reference} ${item.title} ${item.detail}`.toLowerCase().includes(props.query!.toLowerCase()))
+    ? props.items.filter((item) => `${item.reference} ${item.title} ${item.detail} ${item.status} ${item.warehouse ?? ""}`.toLowerCase().includes(props.query!.toLowerCase()))
     : props.items;
   const active = props.items.filter((item) => !["completed", "delivered", "inactive", "archived", "cancelled"].includes(item.status)).length;
   const completed = props.items.filter((item) => ["completed", "delivered", "verified"].includes(item.status)).length;
@@ -190,7 +192,7 @@ export function ModulePage({ config, ...props }: Props) {
                 </div>
                 <button type="button" onClick={() => setDrawerOpen(false)} className="grid size-10 shrink-0 place-items-center rounded-xl border border-line text-muted transition hover:bg-blue-50 hover:text-accent" aria-label="Close drawer"><X size={17} /></button>
               </div>
-              <RecordForm item={editingItem} config={config} organizationId={props.organizationId} warehouses={props.warehouses} products={props.products} suppliers={props.suppliers} locations={props.locations} />
+              <RecordForm item={editingItem} createReference={props.createReference} config={config} organizationId={props.organizationId} warehouses={props.warehouses} products={props.products} suppliers={props.suppliers} locations={props.locations} />
             </motion.aside>
           </>
         )}
@@ -199,9 +201,10 @@ export function ModulePage({ config, ...props }: Props) {
   );
 }
 
-function RecordForm({ item, config, organizationId, warehouses, products, suppliers, locations }: { item: OperationalItem | null; config: ModuleConfig; organizationId: string; warehouses: ModuleOption[]; products: ModuleOption[]; suppliers: ModuleOption[]; locations: ModuleOption[] }) {
+function RecordForm({ item, createReference, config, organizationId, warehouses, products, suppliers, locations }: { item: OperationalItem | null; createReference: string; config: ModuleConfig; organizationId: string; warehouses: ModuleOption[]; products: ModuleOption[]; suppliers: ModuleOption[]; locations: ModuleOption[] }) {
   const relatedOptions = config.needsProduct ? products : config.needsSupplier ? suppliers : [];
   const [selectedWarehouseId, setSelectedWarehouseId] = useState(item?.warehouseId ?? "");
+  const automaticReference = item?.reference ?? createReference;
   const availableLocations = locations.filter((location) => location.warehouseId === selectedWarehouseId);
   return (
     <form action={item ? updateOperationalItem : createOperationalItem} className="flex min-h-0 flex-1 flex-col">
@@ -209,7 +212,14 @@ function RecordForm({ item, config, organizationId, warehouses, products, suppli
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="module" value={config.key} />
       {item && <input type="hidden" name="itemId" value={item.id} />}
-      <Field label={config.referenceLabel} name="reference" defaultValue={item?.reference} placeholder={referencePlaceholder(config.key)} />
+      <label>
+        <span className={labelClass}>{config.referenceLabel}</span>
+        <span className="relative block">
+          <Sparkles className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-600" size={14} />
+          <input name="reference" value={automaticReference} readOnly aria-label={`${config.referenceLabel}, automatically generated`} className={`${fieldClass} cursor-default bg-blue-50/60 pl-9 pr-24 font-mono font-semibold text-blue-800`} />
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700">Automatic</span>
+        </span>
+      </label>
       {config.key === "movements" ? <input type="hidden" name="title" value="Inventory movement" /> : <Field label={config.titleLabel} name="title" defaultValue={item?.title} placeholder={`Enter ${config.titleLabel.toLowerCase()}`} />}
       {config.needsWarehouse && <Select label={config.key === "transfers" ? "Source warehouse" : "Warehouse"} name="warehouseId" options={warehouses} value={selectedWarehouseId} onChange={(event) => setSelectedWarehouseId(event.target.value)} required />}
       {config.key === "movements" && <Select label="Warehouse location" name="locationId" options={availableLocations} required />}
@@ -296,4 +306,3 @@ function formatOperationalValue(value: number, config: ModuleConfig) { return is
 function isProcurement(config: ModuleConfig) { return ["requisitions", "rfqs", "quotations", "purchase_orders"].includes(config.key); }
 function formatDate(value: string) { return new Intl.DateTimeFormat("en", { month: "short", day: "2-digit", year: "numeric" }).format(new Date(value)); }
 function toDateTimeLocal(value?: string | null) { if (!value) return undefined; const date = new Date(value); const offset = date.getTimezoneOffset() * 60_000; return new Date(date.getTime() - offset).toISOString().slice(0, 16); }
-function referencePlaceholder(key: string) { const prefixes: Record<string, string> = { products: "SKU-001", suppliers: "SUP-001", locations: "A-01-01", movements: "GRN-0001", transfers: "TR-0001", cycle_counts: "CC-0001", receiving: "RCV-0001", putaway: "PUT-0001", picking: "PICK-0001", requisitions: "PR-0001", rfqs: "RFQ-0001", quotations: "QT-0001", purchase_orders: "PO-0001", logistics: "SHP-0001", documents: "DOC-0001" }; return prefixes[key] ?? "REF-0001"; }

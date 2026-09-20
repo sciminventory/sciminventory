@@ -5,6 +5,7 @@ export type DashboardMetric = {
   trendTone: "positive" | "neutral" | "attention";
   detail: string;
   kind: "products" | "stock" | "orders" | "inbound";
+  href: string;
   bars: number[];
 };
 
@@ -74,5 +75,6 @@ export function emptyDashboardData(setupError?: string): DashboardData {
 }
 
 function metric(label: string, value: string, trend: string, trendTone: DashboardMetric["trendTone"], detail: string, kind: DashboardMetric["kind"]): DashboardMetric {
-  return { label, value, trend, trendTone, detail, kind, bars: [0, 0, 0, 0, 0, 0] };
+  const href = { products: "/dashboard/inventory/products", stock: "/dashboard/inventory/stock", orders: "/dashboard/procurement/purchase-orders", inbound: "/dashboard/warehouse/receiving" }[kind];
+  return { label, value, trend, trendTone, detail, kind, href, bars: [0, 0, 0, 0, 0, 0] };
 }

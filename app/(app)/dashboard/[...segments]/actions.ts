@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { moduleConfigs, modulePaths, type OperationalModule } from "@/lib/operations/modules";
 import { canManageOperationalModule } from "@/lib/auth/permissions";
 import { requireMfaSession } from "@/lib/auth/require-mfa";
+import { createOperationalReference } from "@/lib/operations/references";
 
 const moduleSchema = z.enum([
   "products", "stock", "movements", "transfers", "cycle_counts",
@@ -81,10 +82,12 @@ function refresh(module: OperationalModule) {
 }
 
 export async function createOperationalItem(formData: FormData) {
+  const submittedModule = String(formData.get("module") ?? "");
+  const submittedReference = String(formData.get("reference") ?? "").trim();
   const raw = {
     organizationId: String(formData.get("organizationId") ?? ""),
-    module: String(formData.get("module") ?? ""),
-    reference: String(formData.get("reference") ?? ""),
+    module: submittedModule,
+    reference: submittedReference || createOperationalReference(submittedModule),
     title: String(formData.get("title") ?? ""),
     status: String(formData.get("status") ?? ""),
     quantity: String(formData.get("quantity") ?? ""),

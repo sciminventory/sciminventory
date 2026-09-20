@@ -147,7 +147,8 @@ function movementTotal(movements: Array<{ occurred_at: string; quantity: number 
 }
 
 function makeMetric(label: string, value: string, trend: string, trendTone: DashboardMetric["trendTone"], detail: string, kind: DashboardMetric["kind"], values: number[]): DashboardMetric {
-  return { label, value, trend, trendTone, detail, kind, bars: normalizeBars(values) };
+  const href = { products: "/dashboard/inventory/products", stock: "/dashboard/inventory/stock", orders: "/dashboard/procurement/purchase-orders", inbound: "/dashboard/warehouse/receiving" }[kind];
+  return { label, value, trend, trendTone, detail, kind, href, bars: normalizeBars(values) };
 }
 
 function normalizeBars(values: number[]) {

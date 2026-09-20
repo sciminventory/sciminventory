@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import Link from "next/link";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 import type { DashboardData } from "@/lib/operations/dashboard-data";
 import { formatPhpCurrency } from "@/lib/utils";
@@ -93,8 +94,8 @@ function ServiceLevelChart({ service }: { service: DashboardData["service"] }) {
   const circumference = 2 * Math.PI * 42;
   const offset = circumference * (1 - Math.min(100, Math.max(0, service.rate)) / 100);
   return (
-    <section className="rounded-2xl border border-line bg-gradient-to-br from-[#0b1f3a] to-[#123a72] p-5 text-white shadow-[0_18px_55px_rgba(11,31,58,.16)] sm:p-6">
-      <div className="flex items-start justify-between"><div><p className="font-mono text-xs uppercase tracking-[.12em] text-blue-200">Service level</p><h2 className="mt-2 text-base font-bold">Orders fulfilled</h2></div><ArrowUpRight size={17} className="text-blue-200" /></div>
+    <Link href="/dashboard/logistics?q=delivered" aria-label="Open fulfilled orders" className="group block rounded-2xl border border-line bg-gradient-to-br from-[#0b1f3a] to-[#123a72] p-5 text-white shadow-[0_18px_55px_rgba(11,31,58,.16)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_65px_rgba(11,31,58,.24)] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-blue-300 sm:p-6">
+      <div className="flex items-start justify-between"><div><p className="font-mono text-xs uppercase tracking-[.12em] text-blue-200">Service level</p><h2 className="mt-2 text-base font-bold">Orders fulfilled</h2></div><ArrowUpRight size={17} className="text-blue-200 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></div>
       <div className="mt-5 flex flex-col items-stretch gap-5 min-[420px]:flex-row min-[420px]:items-center">
         <div className="relative mx-auto size-28 shrink-0 min-[420px]:mx-0 sm:size-32">
           <svg viewBox="0 0 100 100" className="-rotate-90"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.1)" strokeWidth="8" /><motion.circle cx="50" cy="50" r="42" fill="none" stroke="#78a8ff" strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} initial={{ strokeDashoffset: circumference }} whileInView={{ strokeDashoffset: offset }} viewport={{ once: false }} transition={{ duration: reduceMotion ? 0 : 1.2, ease: [0.22, 1, 0.36, 1] }} /></svg>
@@ -104,7 +105,8 @@ function ServiceLevelChart({ service }: { service: DashboardData["service"] }) {
           {[['On time', service.onTime], ['Late', service.late], ['Exceptions', service.exceptions]].map(([label, value]) => <div key={label} className="flex items-center justify-between border-b border-white/10 pb-2"><span className="text-sm text-blue-100/70">{label}</span><strong className="font-mono text-sm">{value}</strong></div>)}
         </div>
       </div>
-    </section>
+      <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4 text-sm font-bold text-blue-100"><span>View fulfilled orders</span><ArrowUpRight size={14} /></div>
+    </Link>
   );
 }
 

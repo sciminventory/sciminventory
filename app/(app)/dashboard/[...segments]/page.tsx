@@ -4,6 +4,7 @@ import { ModulePage, type ModuleOption, type OperationalItem } from "@/component
 import { getModuleFromSegments, type OperationalModule } from "@/lib/operations/modules";
 import { canManageOperationalModule, canViewOperationalModule } from "@/lib/auth/permissions";
 import { createClient } from "@/lib/supabase/server";
+import { createOperationalReference } from "@/lib/operations/references";
 
 export const metadata: Metadata = { title: "Operations" };
 
@@ -43,7 +44,7 @@ export default async function OperationalModulePage({ params, searchParams }: { 
   const locations: ModuleOption[] = (locationResult.data ?? []).map((row) => ({ id: row.id, code: row.code, name: `${warehouseNameById.get(row.warehouse_id) ?? "Warehouse"} · ${row.name}`, warehouseId: row.warehouse_id }));
   const items = setupError ? [] : await loadItems(supabase, config.key, organizationId, warehouses, products, suppliers, locations);
 
-  return <ModulePage config={config} organizationId={organizationId} role={membership.role} items={items} warehouses={warehouses} products={products} suppliers={suppliers} locations={locations} canManage={canManageOperationalModule(config.key, membership.role)} success={search.success} error={search.error} setupError={setupError} query={search.q} openCreate={search.create === "1"} />;
+  return <ModulePage config={config} organizationId={organizationId} role={membership.role} items={items} warehouses={warehouses} products={products} suppliers={suppliers} locations={locations} createReference={createOperationalReference(config.key)} canManage={canManageOperationalModule(config.key, membership.role)} success={search.success} error={search.error} setupError={setupError} query={search.q} openCreate={search.create === "1"} />;
 }
 
 type Client = Awaited<ReturnType<typeof createClient>>;
