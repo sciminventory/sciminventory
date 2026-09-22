@@ -142,6 +142,11 @@ export type Database = {
           category: string | null;
           unit_of_measure: string;
           reorder_point: number;
+          unit_price: number;
+          default_supplier_id: string | null;
+          default_warehouse_id: string | null;
+          default_location_id: string | null;
+          expiry_date: string | null;
           is_active: boolean;
           created_at: string;
           updated_at: string;
@@ -154,6 +159,11 @@ export type Database = {
           category?: string | null;
           unit_of_measure?: string;
           reorder_point?: number;
+          unit_price?: number;
+          default_supplier_id?: string | null;
+          default_warehouse_id?: string | null;
+          default_location_id?: string | null;
+          expiry_date?: string | null;
           is_active?: boolean;
         };
         Update: {
@@ -162,6 +172,11 @@ export type Database = {
           category?: string | null;
           unit_of_measure?: string;
           reorder_point?: number;
+          unit_price?: number;
+          default_supplier_id?: string | null;
+          default_warehouse_id?: string | null;
+          default_location_id?: string | null;
+          expiry_date?: string | null;
           is_active?: boolean;
           updated_at?: string;
         };
@@ -459,6 +474,7 @@ export type Database = {
           notes: string | null;
           shipping_address: string | null;
           delivery_date: string | null;
+          order_date: string;
           terms_and_conditions: string | null;
           version: number;
           created_by: string;
@@ -480,6 +496,7 @@ export type Database = {
           notes?: string | null;
           shipping_address?: string | null;
           delivery_date?: string | null;
+          order_date?: string;
           terms_and_conditions?: string | null;
           version?: number;
           created_by: string;
@@ -496,6 +513,7 @@ export type Database = {
           notes?: string | null;
           shipping_address?: string | null;
           delivery_date?: string | null;
+          order_date?: string;
           terms_and_conditions?: string | null;
           version?: number;
           updated_at?: string;
@@ -1829,6 +1847,23 @@ export type Database = {
           target_quantity: number;
           target_reference: string;
           target_notes?: string | null;
+        };
+        Returns: string;
+      };
+      create_inventory_product: {
+        Args: {
+          target_organization_id: string;
+          product_sku: string;
+          product_name: string;
+          product_category: string;
+          product_reorder_level: number;
+          product_unit_price: number;
+          target_supplier_id: string;
+          target_warehouse_id: string;
+          target_location_id: string;
+          initial_quantity: number;
+          product_expiry_date: string | null;
+          product_is_active?: boolean;
         };
         Returns: string;
       };

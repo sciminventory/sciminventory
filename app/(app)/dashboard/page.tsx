@@ -94,7 +94,7 @@ export default async function DashboardPage() {
   const overdueOrder = openPurchaseOrders.find((record) => record.due_at && new Date(record.due_at) < new Date());
   if (overdueOrder) alerts.push({ level: "Delayed", title: `${overdueOrder.reference} is past its expected date`, meta: overdueOrder.title, action: "Open purchase orders", href: "/dashboard/procurement/purchase-orders" });
   const activeCount = operations.find((operation) => operation.operation_type === "cycle_count" && ["submitted", "in_progress"].includes(operation.status));
-  if (activeCount && alerts.length < 3) alerts.push({ level: "Review", title: `${activeCount.reference} requires count completion`, meta: activeCount.title, action: "Review count", href: "/dashboard/inventory/cycle-counts" });
+  if (activeCount && alerts.length < 3) alerts.push({ level: "Review", title: `${activeCount.reference} requires count completion`, meta: activeCount.title, action: "Open stock", href: "/dashboard/inventory/stock" });
 
   const metrics: DashboardMetric[] = [
     makeMetric("Active products", formatInteger(activeProducts.length), `${health.healthy} healthy`, "positive", `${health.low + health.critical} need attention`, "products", throughput["30D"]),

@@ -5,14 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bell,
-  ArrowRight,
   Boxes,
   BriefcaseBusiness,
-  Building2,
   ChevronDown,
   ClipboardList,
   Command,
   FileText,
+  History,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -53,31 +52,10 @@ const navigation = [
     items: [
       { label: "Products", href: modulePaths.products },
       { label: "Stock", href: modulePaths.stock },
-      { label: "Movements", href: modulePaths.movements },
-      { label: "Transfers", href: modulePaths.transfers },
-      { label: "Cycle counts", href: modulePaths.cycle_counts },
     ],
   },
-  {
-    label: "Warehouse",
-    icon: Warehouse,
-    items: [
-      { label: "Receiving", href: modulePaths.receiving },
-      { label: "Putaway", href: modulePaths.putaway },
-      { label: "Picking", href: modulePaths.picking },
-      { label: "Locations", href: modulePaths.locations },
-    ],
-  },
-  {
-    label: "Procurement",
-    icon: ClipboardList,
-    items: [
-      { label: "Requisitions", href: modulePaths.requisitions },
-      { label: "RFQs", href: modulePaths.rfqs },
-      { label: "Quotations", href: modulePaths.quotations },
-      { label: "Purchase orders", href: modulePaths.purchase_orders },
-    ],
-  },
+  { label: "Warehouse", icon: Warehouse, href: modulePaths.locations },
+  { label: "Purchase orders", icon: ClipboardList, href: modulePaths.purchase_orders },
   {
     label: "Recruitment",
     icon: BriefcaseBusiness,
@@ -91,6 +69,7 @@ const navigation = [
   { label: "Vendors", icon: Users, href: "/dashboard/vendors" },
   { label: "Logistics", icon: Truck, href: modulePaths.logistics },
   { label: "Documents", icon: FileText, href: modulePaths.documents },
+  { label: "History & reports", icon: History, href: "/dashboard/history" },
 ] as const;
 
 type Props = {
@@ -123,7 +102,7 @@ export function OperationsShell({
   const visibleNavigation = navigation.filter((item) => {
     if (item.label === "Recruitment") return recruitmentAccess;
     if (item.label === "Inventory" || item.label === "Warehouse") return canViewOperationalModule("stock", effectiveRole);
-    if (item.label === "Procurement") return canViewOperationalModule("suppliers", effectiveRole);
+    if (item.label === "Purchase orders") return canViewOperationalModule("purchase_orders", effectiveRole);
     if (item.label === "Vendors") return hasPermission(effectiveRole, "vendors.read");
     if (item.label === "Logistics") return canViewOperationalModule("logistics", effectiveRole);
     if (item.label === "Documents") return canViewOperationalModule("documents", effectiveRole);
@@ -360,11 +339,6 @@ export function OperationsShell({
                 </div>
               )}
             </div>
-            <Link href="/dashboard/administration#warehouses" className="hidden h-9 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold md:flex">
-              <Building2 size={14} />
-              Warehouses
-              <ArrowRight size={11} />
-            </Link>
           </div>
         </header>
         <main className="min-w-0 overflow-x-clip">{children}</main>

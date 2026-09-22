@@ -12,14 +12,16 @@ import {
   Plus,
   Search,
   Download,
+  Eye,
   Pencil,
   Sparkles,
+  Trash2,
   X,
 } from "lucide-react";
 import { AdminActionButton } from "@/components/operations/admin-action-button";
 import { ScrollReveal } from "@/components/motion/scroll-motion";
 import { ToastNotification } from "@/components/ui/toast-notification";
-import { createOperationalItem, downloadDocument, updateOperationalItem, updateOperationalStatus } from "@/app/(app)/dashboard/[...segments]/actions";
+import { createOperationalItem, deleteOperationalItem, downloadDocument, updateOperationalItem, updateOperationalStatus } from "@/app/(app)/dashboard/[...segments]/actions";
 import { modulePaths, type ModuleConfig } from "@/lib/operations/modules";
 import { formatPhpCurrency } from "@/lib/utils";
 
@@ -31,12 +33,21 @@ export type OperationalItem = {
   editDetail?: string;
   status: string;
   quantity: number | null;
+  reorderLevel?: number | null;
   dueAt: string | null;
   createdAt: string;
   warehouse: string | null;
   warehouseId?: string | null;
+  locationId?: string | null;
+  supplierId?: string | null;
   destinationWarehouseId?: string | null;
   relatedId?: string | null;
+  unitPrice?: number | null;
+  expiryDate?: string | null;
+  orderDate?: string | null;
+  productId?: string | null;
+  lineQuantity?: number | null;
+  supplierName?: string | null;
   immutable?: boolean;
 };
 
@@ -66,6 +77,7 @@ const labelClass = "mb-2 block font-mono text-xs font-medium uppercase tracking-
 export function ModulePage({ config, ...props }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(Boolean(props.openCreate));
   const [editingItem, setEditingItem] = useState<OperationalItem | null>(null);
+  const [viewOnly, setViewOnly] = useState(false);
   const filtered = props.query
     ? props.items.filter((item) => `${item.reference} ${item.title} ${item.detail} ${item.status} ${item.warehouse ?? ""}`.toLowerCase().includes(props.query!.toLowerCase()))
     : props.items;
@@ -97,11 +109,11 @@ export function ModulePage({ config, ...props }: Props) {
           <p className="mt-2 max-w-2xl text-sm leading-5 text-muted">{config.description}</p>
         </div>
         {config.readOnly ? (
-          <Link href={modulePaths.movements} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-bold text-white hover:bg-blue-700 sm:w-auto">
-            Post movement <ArrowRight size={13} />
+          <Link href={`${modulePaths.products}?create=1`} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-bold text-white hover:bg-blue-700 sm:w-auto">
+            Add product <ArrowRight size={13} />
           </Link>
         ) : props.canManage ? (
-          <button type="button" onClick={() => { setEditingItem(null); setDrawerOpen(true); }} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-bold text-white hover:bg-blue-700 sm:w-auto">
+          <button type="button" onClick={() => { setEditingItem(null); setViewOnly(false); setDrawerOpen(true); }} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-bold text-white hover:bg-blue-700 sm:w-auto">
             <Plus size={14} /> {config.createLabel}
           </button>
         ) : (
@@ -120,7 +132,7 @@ export function ModulePage({ config, ...props }: Props) {
       <div className="grid overflow-hidden rounded-2xl border border-line bg-white shadow-[0_14px_40px_rgba(25,72,133,.055)] sm:grid-cols-3">
         <Metric label="Total records" value={props.items.length.toLocaleString()} detail={`All ${config.title.toLowerCase()}`} />
         <Metric label="Active workflow" value={active.toLocaleString()} detail="Open or actionable" />
-        <Metric label={config.quantityLabel ?? "Completed"} value={config.quantityLabel ? formatOperationalValue(totalQuantity, config) : completed.toLocaleString()} detail={config.quantityLabel ? "Across visible records" : "Completed records"} />
+        <Metric label={config.key === "products" ? "Stock on hand" : config.quantityLabel ?? "Completed"} value={config.quantityLabel ? formatOperationalValue(totalQuantity, config) : completed.toLocaleString()} detail={config.quantityLabel ? "Across visible records" : "Completed records"} />
       </div>
       </ScrollReveal>
 
@@ -139,21 +151,31 @@ export function ModulePage({ config, ...props }: Props) {
               <span className="mx-auto grid size-11 place-items-center rounded-xl bg-blue-50 text-accent"><Boxes size={18} /></span>
               <h2 className="mt-4 text-sm font-bold">{props.query ? "No matching records" : `No ${config.title.toLowerCase()} yet`}</h2>
               <p className="mx-auto mt-2 max-w-sm text-sm leading-5 text-muted">
-                {props.query ? "Try a different reference or name." : config.readOnly ? "Post an inventory movement to establish the first live balance." : `Use “${config.createLabel}” to create the first workspace record.`}
+                {props.query ? "Try a different reference or name." : config.readOnly ? "Add a product with its opening quantity to establish the first live balance." : `Use “${config.createLabel}” to create the first workspace record.`}
               </p>
             </div>
           </div>
         ) : (
           <><div className="divide-y divide-line md:hidden">
-            {filtered.map((item) => <ItemCard key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} onEdit={() => { setEditingItem(item); setDrawerOpen(true); }} />)}
+            {filtered.map((item) => <ItemCard key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} onView={() => { setEditingItem(item); setViewOnly(true); setDrawerOpen(true); }} onEdit={() => { setEditingItem(item); setViewOnly(false); setDrawerOpen(true); }} />)}
           </div>
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-[820px] text-left">
+            <table className={`w-full text-left ${config.key === "products" ? "min-w-[640px]" : "min-w-[820px]"}`}>
               <thead className="border-b border-line bg-[#f8faff] font-mono text-xs uppercase tracking-wider text-muted">
-                <tr><th className="px-5 py-3 font-medium">Reference</th><th className="px-5 py-3 font-medium">Record</th><th className="px-5 py-3 font-medium">Warehouse / context</th><th className="px-5 py-3 font-medium">{config.quantityLabel ?? "Quantity"}</th><th className="px-5 py-3 font-medium">Created / due</th><th className="px-5 py-3 font-medium">Status / action</th></tr>
+                {config.key === "products" ? (
+                  <tr><th className="px-5 py-3 font-medium">Name</th><th className="px-5 py-3 font-medium">SKU</th><th className="px-5 py-3 font-medium">Quantity</th><th className="px-5 py-3 text-right font-medium">Actions</th></tr>
+                ) : config.key === "purchase_orders" ? (
+                  <tr><th className="px-5 py-3 font-medium">PO Number</th><th className="px-5 py-3 font-medium">Supplier</th><th className="px-5 py-3 font-medium">Status</th><th className="px-5 py-3 font-medium">Total</th><th className="px-5 py-3 font-medium">Order date</th><th className="px-5 py-3 text-right font-medium">Actions</th></tr>
+                ) : (
+                  <tr><th className="px-5 py-3 font-medium">Reference</th><th className="px-5 py-3 font-medium">Record</th><th className="px-5 py-3 font-medium">Warehouse / context</th><th className="px-5 py-3 font-medium">{config.quantityLabel ?? "Quantity"}</th><th className="px-5 py-3 font-medium">Created / due</th><th className="px-5 py-3 font-medium">Status / action</th></tr>
+                )}
               </thead>
               <tbody>
-                {filtered.map((item) => <ItemRow key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} onEdit={() => { setEditingItem(item); setDrawerOpen(true); }} />)}
+                {filtered.map((item) => config.key === "products"
+                  ? <ProductRow key={item.id} item={item} organizationId={props.organizationId} canManage={props.canManage} onEdit={() => { setEditingItem(item); setViewOnly(false); setDrawerOpen(true); }} />
+                  : config.key === "purchase_orders"
+                    ? <PurchaseOrderRow key={item.id} item={item} organizationId={props.organizationId} canManage={props.canManage} onView={() => { setEditingItem(item); setViewOnly(true); setDrawerOpen(true); }} onEdit={() => { setEditingItem(item); setViewOnly(false); setDrawerOpen(true); }} />
+                    : <ItemRow key={item.id} item={item} config={config} organizationId={props.organizationId} canManage={props.canManage} onEdit={() => { setEditingItem(item); setViewOnly(false); setDrawerOpen(true); }} />)}
               </tbody>
             </table>
           </div></>
@@ -162,7 +184,7 @@ export function ModulePage({ config, ...props }: Props) {
       </ScrollReveal>
 
       <AnimatePresence>
-        {drawerOpen && props.canManage && !config.readOnly && (
+        {drawerOpen && !config.readOnly && (props.canManage || viewOnly) && (
           <>
             <motion.button
               type="button"
@@ -186,13 +208,13 @@ export function ModulePage({ config, ...props }: Props) {
               <div className="flex items-start gap-3 border-b border-line bg-white px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
                 <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-accent"><PackageOpen size={19} /></span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-xs uppercase tracking-[.1em] text-blue-700">{editingItem ? "Edit record" : "Create record"}</p>
-                  <h2 id="record-drawer-title" className="mt-1 text-xl font-bold tracking-[-.035em]">{editingItem ? `Edit ${config.singular}` : `New ${config.singular}`}</h2>
+                  <p className="font-mono text-xs uppercase tracking-[.1em] text-blue-700">{viewOnly ? "View record" : editingItem ? "Edit record" : "Create record"}</p>
+                  <h2 id="record-drawer-title" className="mt-1 text-xl font-bold tracking-[-.035em]">{viewOnly ? `${config.singular.replace(/^./, (letter) => letter.toUpperCase())} details` : editingItem ? `Edit ${config.singular}` : `New ${config.singular}`}</h2>
                   <p className="mt-1 text-sm text-muted">Validated and securely scoped to your organization.</p>
                 </div>
                 <button type="button" onClick={() => setDrawerOpen(false)} className="grid size-10 shrink-0 place-items-center rounded-xl border border-line text-muted transition hover:bg-blue-50 hover:text-accent" aria-label="Close drawer"><X size={17} /></button>
               </div>
-              <RecordForm item={editingItem} createReference={props.createReference} config={config} organizationId={props.organizationId} warehouses={props.warehouses} products={props.products} suppliers={props.suppliers} locations={props.locations} />
+              <RecordForm item={editingItem} viewOnly={viewOnly} createReference={props.createReference} config={config} organizationId={props.organizationId} warehouses={props.warehouses} products={props.products} suppliers={props.suppliers} locations={props.locations} />
             </motion.aside>
           </>
         )}
@@ -201,17 +223,51 @@ export function ModulePage({ config, ...props }: Props) {
   );
 }
 
-function RecordForm({ item, createReference, config, organizationId, warehouses, products, suppliers, locations }: { item: OperationalItem | null; createReference: string; config: ModuleConfig; organizationId: string; warehouses: ModuleOption[]; products: ModuleOption[]; suppliers: ModuleOption[]; locations: ModuleOption[] }) {
+function RecordForm({ item, viewOnly, createReference, config, organizationId, warehouses, products, suppliers, locations }: { item: OperationalItem | null; viewOnly: boolean; createReference: string; config: ModuleConfig; organizationId: string; warehouses: ModuleOption[]; products: ModuleOption[]; suppliers: ModuleOption[]; locations: ModuleOption[] }) {
   const relatedOptions = config.needsProduct ? products : config.needsSupplier ? suppliers : [];
   const [selectedWarehouseId, setSelectedWarehouseId] = useState(item?.warehouseId ?? "");
   const automaticReference = item?.reference ?? createReference;
   const availableLocations = locations.filter((location) => location.warehouseId === selectedWarehouseId);
   return (
     <form action={item ? updateOperationalItem : createOperationalItem} className="flex min-h-0 flex-1 flex-col">
-      <div className="grid flex-1 content-start gap-5 overflow-y-auto p-4 sm:grid-cols-2 sm:p-6">
+      <fieldset disabled={viewOnly} className="grid flex-1 content-start gap-5 overflow-y-auto p-4 disabled:opacity-90 sm:grid-cols-2 sm:p-6">
       <input type="hidden" name="organizationId" value={organizationId} />
       <input type="hidden" name="module" value={config.key} />
       {item && <input type="hidden" name="itemId" value={item.id} />}
+      {config.key === "products" ? <>
+      <Field label="SKU" name="reference" defaultValue={item?.reference ?? createReference} placeholder="Enter SKU" required maxLength={40} />
+      <Field label="Product name" name="title" defaultValue={item?.title} placeholder="Enter product name" required maxLength={160} />
+      {!item ? <Field label="Quantity" name="initialQuantity" type="number" step="0.0001" min="0" defaultValue="0" placeholder="0" required /> : <input type="hidden" name="initialQuantity" value="" />}
+      <Field label="Reorder level" name="quantity" type="number" step="0.0001" min="0" defaultValue={item?.reorderLevel ?? 0} placeholder="0" required />
+      <Field label="Category" name="detail" defaultValue={item?.editDetail ?? item?.detail} placeholder="Enter category" />
+      <Field label="Unit price (₱)" name="unitPrice" type="number" step="0.01" min="0" defaultValue={item?.unitPrice ?? 0} placeholder="0.00" required />
+      <Select label="Warehouse" name="warehouseId" options={warehouses} value={selectedWarehouseId} onChange={(event) => setSelectedWarehouseId(event.target.value)} required />
+      <Select label="Supplier" name="supplierId" options={suppliers} defaultValue={item?.supplierId ?? ""} required />
+      <Select label="Location in warehouse" name="locationId" options={availableLocations} defaultValue={item?.locationId ?? ""} required />
+      <Field label="Expiry date" name="expiryDate" type="date" defaultValue={item?.expiryDate ?? undefined} />
+      <label><span className={labelClass}>Status</span><select name="status" defaultValue={item?.status ?? "active"} className={fieldClass}>{config.statusOptions.map((status) => <option key={status} value={status}>{humanize(status)}</option>)}</select></label>
+      <input type="hidden" name="destinationWarehouseId" value="" />
+      <input type="hidden" name="relatedId" value="" />
+      <input type="hidden" name="dueAt" value="" />
+      </> : config.key === "purchase_orders" ? <>
+      <input type="hidden" name="reference" value={automaticReference} />
+      <input type="hidden" name="title" value={`Purchase order ${automaticReference}`} />
+      <Select label="Supplier" name="relatedId" options={suppliers} defaultValue={item?.relatedId ?? ""} required />
+      <Select label="Warehouse" name="warehouseId" options={warehouses} defaultValue={item?.warehouseId ?? ""} required />
+      <Field label="Order date" name="orderDate" type="date" defaultValue={item?.orderDate ?? new Date().toISOString().slice(0, 10)} required />
+      <Field label="Expected delivery" name="dueAt" type="date" defaultValue={item?.dueAt?.slice(0, 10)} required />
+      <label><span className={labelClass}>Status</span><select name="status" defaultValue={item?.status ?? "draft"} className={fieldClass}>{config.statusOptions.map((status) => <option key={status} value={status}>{humanize(status)}</option>)}</select></label>
+      <Field label="Notes" name="detail" defaultValue={item?.editDetail ?? item?.detail} placeholder="Add purchasing instructions or notes" />
+      <Select label="Inventory item" name="productId" options={products} defaultValue={item?.productId ?? ""} required />
+      <Field label="Quantity" name="lineQuantity" type="number" step="0.0001" min="0.0001" defaultValue={item?.lineQuantity ?? undefined} required />
+      <Field label="Unit price (₱)" name="unitPrice" type="number" step="0.01" min="0" defaultValue={item?.unitPrice ?? undefined} required />
+      <input type="hidden" name="quantity" value="" />
+      <input type="hidden" name="destinationWarehouseId" value="" />
+      <input type="hidden" name="locationId" value="" />
+      <input type="hidden" name="supplierId" value="" />
+      <input type="hidden" name="initialQuantity" value="" />
+      <input type="hidden" name="expiryDate" value="" />
+      </> : <>
       <label>
         <span className={labelClass}>{config.referenceLabel}</span>
         <span className="relative block">
@@ -234,16 +290,17 @@ function RecordForm({ item, createReference, config, organizationId, warehouses,
       {["products", "suppliers", "locations", "movements", "documents"].includes(config.key) && <input type="hidden" name="dueAt" value="" />}
       <Field label={config.detailLabel ?? "Notes"} name="detail" type={config.key === "suppliers" ? "email" : "text"} defaultValue={item?.editDetail ?? item?.detail} placeholder={`Enter ${(config.detailLabel ?? "notes").toLowerCase()}`} />
       {config.key === "documents" && !item && <label className="sm:col-span-2"><span className={labelClass}>File · max 25 MB</span><input required type="file" name="file" className="block h-10 w-full rounded-lg border border-line bg-white text-sm file:mr-3 file:h-full file:border-0 file:border-r file:border-line file:bg-blue-50 file:px-3 file:text-sm file:font-bold file:text-blue-700" /></label>}
-      </div>
-      <div className="border-t border-line bg-white p-5">
+      </>}
+      </fieldset>
+      {!viewOnly && <div className="border-t border-line bg-white p-5">
         <AdminActionButton className="h-11 w-full">{item ? <Pencil size={14} /> : <FileUp size={14} />} {item ? "Save changes" : config.createLabel}</AdminActionButton>
         <p className="mt-3 text-center text-xs text-muted">This action will be recorded in the workspace audit history.</p>
-      </div>
+      </div>}
     </form>
   );
 }
 
-function ItemCard({ item, config, organizationId, canManage, onEdit }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean; onEdit: () => void }) {
+function ItemCard({ item, config, organizationId, canManage, onView, onEdit }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean; onView: () => void; onEdit: () => void }) {
   return (
     <article className="p-4">
       <div className="flex items-start justify-between gap-3">
@@ -256,12 +313,31 @@ function ItemCard({ item, config, organizationId, canManage, onEdit }: { item: O
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-mist p-3 text-sm">
         <div><dt className="text-muted">Warehouse / context</dt><dd className="mt-1 break-words font-semibold">{item.warehouse ?? "Organization-wide"}</dd></div>
-        <div><dt className="text-muted">{config.quantityLabel ?? "Quantity"}</dt><dd className="mt-1 font-mono font-semibold">{item.quantity === null ? "—" : formatOperationalValue(item.quantity, config)}</dd></div>
+        <div><dt className="text-muted">{config.key === "products" ? "Quantity" : config.quantityLabel ?? "Quantity"}</dt><dd className="mt-1 font-mono font-semibold">{item.quantity === null ? "—" : formatOperationalValue(item.quantity, config)}</dd></div>
         <div><dt className="text-muted">Created</dt><dd className="mt-1 font-mono font-semibold">{formatDate(item.createdAt)}</dd></div>
         <div><dt className="text-muted">Due</dt><dd className="mt-1 font-mono font-semibold">{item.dueAt ? formatDate(item.dueAt) : "Not set"}</dd></div>
       </dl>
-      {(canManage || config.key === "documents") && <div className="mt-4"><ItemActions item={item} config={config} organizationId={organizationId} canManage={canManage} onEdit={onEdit} mobile /></div>}
+      {(canManage || config.key === "documents" || config.key === "purchase_orders") && <div className="mt-4"><ItemActions item={item} config={config} organizationId={organizationId} canManage={canManage} onView={onView} onEdit={onEdit} mobile /></div>}
     </article>
+  );
+}
+
+function PurchaseOrderRow({ item, organizationId, canManage, onView, onEdit }: { item: OperationalItem; organizationId: string; canManage: boolean; onView: () => void; onEdit: () => void }) {
+  return (
+    <tr className="border-b border-line text-sm last:border-0">
+      <td className="px-5 py-4 font-mono font-semibold text-blue-700">{item.reference}</td>
+      <td className="px-5 py-4 font-semibold">{item.supplierName ?? "—"}</td>
+      <td className="px-5 py-4"><StatusBadge status={item.status} /></td>
+      <td className="px-5 py-4 font-mono font-semibold">{formatPhpCurrency(item.quantity ?? 0)}</td>
+      <td className="px-5 py-4 font-mono text-xs">{formatDate(item.orderDate ?? item.createdAt)}</td>
+      <td className="px-5 py-3">
+        <div className="flex items-center justify-end gap-2">
+          <button type="button" onClick={onView} className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-bold text-ink transition hover:bg-blue-50 hover:text-blue-700"><Eye size={12} /> View</button>
+          {canManage && <><button type="button" onClick={onEdit} className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-bold text-ink transition hover:bg-blue-50 hover:text-blue-700"><Pencil size={12} /> Edit</button>
+          <DeleteRecordButton item={item} organizationId={organizationId} module="purchase_orders" /></>}
+        </div>
+      </td>
+    </tr>
   );
 }
 
@@ -280,10 +356,32 @@ function ItemRow({ item, config, organizationId, canManage, onEdit }: { item: Op
   );
 }
 
-function ItemActions({ item, config, organizationId, canManage, onEdit, mobile = false }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean; onEdit: () => void; mobile?: boolean }) {
+function ProductRow({ item, organizationId, canManage, onEdit }: { item: OperationalItem; organizationId: string; canManage: boolean; onEdit: () => void }) {
+  return (
+    <tr className="border-b border-line text-sm last:border-0">
+      <td className="px-5 py-4 font-bold text-ink">{item.title}</td>
+      <td className="px-5 py-4 font-mono font-semibold text-blue-700">{item.reference}</td>
+      <td className="px-5 py-4 font-mono font-semibold">{formatNumber(item.quantity ?? 0)}</td>
+      <td className="px-5 py-3">
+        {canManage && <div className="flex items-center justify-end gap-2">
+          <button type="button" onClick={onEdit} className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-bold text-ink transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"><Pencil size={12} /> Edit</button>
+          <form action={deleteOperationalItem} onSubmit={(event) => { if (!window.confirm(`Delete ${item.title}? The product will be archived and its inventory history will be preserved.`)) event.preventDefault(); }}>
+            <input type="hidden" name="organizationId" value={organizationId} />
+            <input type="hidden" name="module" value="products" />
+            <input type="hidden" name="itemId" value={item.id} />
+            <button type="submit" className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-700 transition hover:bg-red-50"><Trash2 size={12} /> Delete</button>
+          </form>
+        </div>}
+      </td>
+    </tr>
+  );
+}
+
+function ItemActions({ item, config, organizationId, canManage, onView, onEdit, mobile = false }: { item: OperationalItem; config: ModuleConfig; organizationId: string; canManage: boolean; onView?: () => void; onEdit: () => void; mobile?: boolean }) {
   return (
     <div className={`flex items-center gap-2 ${mobile ? "flex-wrap" : ""}`}>
-      {!item.immutable && canManage && config.statusOptions.length ? (
+      {config.key === "purchase_orders" && onView && <button type="button" onClick={onView} className={`inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-bold text-ink transition hover:bg-blue-50 hover:text-blue-700 ${mobile ? "flex-1" : ""}`}><Eye size={12} /> View</button>}
+      {!item.immutable && canManage && config.statusOptions.length && config.key !== "purchase_orders" ? (
         <form action={updateOperationalStatus} className={`flex items-center gap-2 ${mobile ? "w-full" : ""}`}>
           <input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="module" value={config.key} /><input type="hidden" name="itemId" value={item.id} />
           <select name="status" defaultValue={item.status} className={`h-10 min-w-0 rounded-lg border border-line bg-white px-2 text-xs ${mobile ? "flex-1" : ""}`}>{config.statusOptions.map((status) => <option key={status} value={status}>{humanize(status)}</option>)}</select>
@@ -291,9 +389,15 @@ function ItemActions({ item, config, organizationId, canManage, onEdit, mobile =
         </form>
       ) : mobile ? null : <StatusBadge status={item.status} />}
       {!item.immutable && canManage && <button type="button" onClick={onEdit} className={`inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-bold text-ink transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 ${mobile ? "flex-1" : ""}`}><Pencil size={12} /> Edit</button>}
+      {config.key === "products" && canManage && <form action={deleteOperationalItem} className={mobile ? "flex-1" : ""} onSubmit={(event) => { if (!window.confirm(`Delete ${item.title}? The product will be archived and its inventory history will be preserved.`)) event.preventDefault(); }}><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="module" value="products" /><input type="hidden" name="itemId" value={item.id} /><button type="submit" className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-700 transition hover:bg-red-50"><Trash2 size={12} /> Delete</button></form>}
+      {config.key === "purchase_orders" && canManage && <DeleteRecordButton item={item} organizationId={organizationId} module="purchase_orders" className={mobile ? "flex-1" : ""} />}
       {config.key === "documents" && <form action={downloadDocument} className={mobile ? "w-full" : ""}><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="itemId" value={item.id} /><AdminActionButton variant="secondary" className={`h-10 px-3 ${mobile ? "w-full" : ""}`}><Download size={11} /> Download</AdminActionButton></form>}
     </div>
   );
+}
+
+function DeleteRecordButton({ item, organizationId, module, className }: { item: OperationalItem; organizationId: string; module: "purchase_orders"; className?: string }) {
+  return <form action={deleteOperationalItem} className={className} onSubmit={(event) => { if (!window.confirm(`Delete ${item.reference}? This cannot be undone.`)) event.preventDefault(); }}><input type="hidden" name="organizationId" value={organizationId} /><input type="hidden" name="module" value={module} /><input type="hidden" name="itemId" value={item.id} /><button type="submit" className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-700 transition hover:bg-red-50"><Trash2 size={12} /> Delete</button></form>;
 }
 
 function Field(props: React.InputHTMLAttributes<HTMLInputElement> & { label: string; name: string }) { const { label, ...rest } = props; return <label><span className={labelClass}>{label}</span><input className={fieldClass} {...rest} /></label>; }

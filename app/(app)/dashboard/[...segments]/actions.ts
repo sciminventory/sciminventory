@@ -26,6 +26,13 @@ const itemSchema = z.object({
   destinationWarehouseId: z.string().trim(),
   relatedId: z.string().trim(),
   locationId: z.string().trim(),
+  supplierId: z.string().trim(),
+  initialQuantity: z.string().trim().max(30),
+  unitPrice: z.string().trim().max(30),
+  productId: z.string().trim(),
+  lineQuantity: z.string().trim().max(30),
+  orderDate: z.string().trim(),
+  expiryDate: z.string().trim(),
   detail: z.string().trim().max(240),
   dueAt: z.string().trim(),
 });
@@ -95,6 +102,13 @@ export async function createOperationalItem(formData: FormData) {
     destinationWarehouseId: String(formData.get("destinationWarehouseId") ?? ""),
     relatedId: String(formData.get("relatedId") ?? ""),
     locationId: String(formData.get("locationId") ?? ""),
+    supplierId: String(formData.get("supplierId") ?? ""),
+    initialQuantity: String(formData.get("initialQuantity") ?? ""),
+    unitPrice: String(formData.get("unitPrice") ?? ""),
+    productId: String(formData.get("productId") ?? ""),
+    lineQuantity: String(formData.get("lineQuantity") ?? ""),
+    orderDate: String(formData.get("orderDate") ?? ""),
+    expiryDate: String(formData.get("expiryDate") ?? ""),
     detail: String(formData.get("detail") ?? ""),
     dueAt: String(formData.get("dueAt") ?? ""),
   };
@@ -110,17 +124,34 @@ export async function createOperationalItem(formData: FormData) {
   const destinationWarehouseId = uuidOrNull(data.destinationWarehouseId);
   const relatedId = uuidOrNull(data.relatedId);
   const locationId = uuidOrNull(data.locationId);
+  const supplierId = uuidOrNull(data.supplierId);
+  const initialQuantity = numberOrNull(data.initialQuantity);
+  const unitPrice = numberOrNull(data.unitPrice);
+  const productId = uuidOrNull(data.productId);
+  const lineQuantity = numberOrNull(data.lineQuantity);
+  const orderDate = data.orderDate || null;
+  const expiryDate = data.expiryDate || null;
   const dueAt = dateOrNull(data.dueAt);
   let error: { message: string } | null = null;
 
   if (data.module === "products") {
-    ({ error } = await supabase.from("products").insert({
-      organization_id: data.organizationId,
-      sku: data.reference.toUpperCase(),
-      name: data.title,
-      category: data.detail || null,
-      reorder_point: quantity ?? 0,
-      is_active: data.status !== "inactive",
+    if (!warehouseId || !locationId || !supplierId) routeTo(data.module, "Select a warehouse, location, and supplier.", "error");
+    if (initialQuantity === null || initialQuantity < 0) routeTo(data.module, "Enter a valid non-negative quantity.", "error");
+    if (quantity === null || quantity < 0) routeTo(data.module, "Enter a valid non-negative reorder level.", "error");
+    if (unitPrice === null || unitPrice < 0) routeTo(data.module, "Enter a valid non-negative unit price.", "error");
+    ({ error } = await supabase.rpc("create_inventory_product", {
+      target_organization_id: data.organizationId,
+      product_sku: data.reference,
+      product_name: data.title,
+      product_category: data.detail,
+      product_reorder_level: quantity,
+      product_unit_price: unitPrice,
+      target_supplier_id: supplierId,
+      target_warehouse_id: warehouseId,
+      target_location_id: locationId,
+      initial_quantity: initialQuantity,
+      product_expiry_date: expiryDate,
+      product_is_active: data.status !== "inactive",
     }));
   } else if (data.module === "suppliers") {
     ({ error } = await supabase.from("suppliers").insert({
@@ -187,7 +218,45 @@ export async function createOperationalItem(formData: FormData) {
       notes: data.detail || null,
       created_by: user.id,
     }));
-  } else if (["requisitions", "rfqs", "quotations", "purchase_orders"].includes(data.module)) {
+  } else if (data.module === "purchase_orders") {
+    if (!relatedId || !warehouseId || !productId) routeTo(data.module, "Select a supplier, warehouse, and inventory item.", "error");
+    if (!orderDate || !data.dueAt) routeTo(data.module, "Select the order and expected delivery dates.", "error");
+    if (lineQuantity === null || lineQuantity <= 0 || unitPrice === null || unitPrice < 0) routeTo(data.module, "Enter a valid quantity and unit price.", "error");
+    const { data: selectedProduct, error: productError } = await supabase.from("products").select("name").eq("id", productId).eq("organization_id", data.organizationId).single();
+    if (productError || !selectedProduct) routeTo(data.module, "The selected inventory item is unavailable.", "error");
+    const total = lineQuantity * unitPrice;
+    const { data: purchaseOrder, error: purchaseOrderError } = await supabase.from("procurement_records").insert({
+      organization_id: data.organizationId,
+      record_type: "purchase_order",
+      reference: data.reference,
+      title: data.title,
+      supplier_id: relatedId,
+      warehouse_id: warehouseId,
+      status: data.status || "draft",
+      amount: total,
+      currency: "PHP",
+      order_date: orderDate,
+      delivery_date: data.dueAt,
+      due_at: dueAt,
+      notes: data.detail || null,
+      created_by: user.id,
+    }).select("id").single();
+    if (purchaseOrderError || !purchaseOrder) routeTo(data.module, purchaseOrderError?.message ?? "Unable to create the purchase order.", "error");
+    const { error: lineError } = await supabase.from("procurement_record_lines").insert({
+      organization_id: data.organizationId,
+      procurement_record_id: purchaseOrder.id,
+      product_id: productId,
+      line_number: 1,
+      description: selectedProduct.name,
+      quantity: lineQuantity,
+      unit_price: unitPrice,
+      promised_date: data.dueAt,
+    });
+    if (lineError) {
+      await supabase.from("procurement_records").delete().eq("id", purchaseOrder.id).eq("organization_id", data.organizationId);
+      routeTo(data.module, lineError.message, "error");
+    }
+  } else if (["requisitions", "rfqs", "quotations"].includes(data.module)) {
     const recordTypes = { requisitions: "requisition", rfqs: "rfq", quotations: "quotation", purchase_orders: "purchase_order" } as const;
     ({ error } = await supabase.from("procurement_records").insert({
       organization_id: data.organizationId,
@@ -259,6 +328,13 @@ export async function updateOperationalItem(formData: FormData) {
     destinationWarehouseId: String(formData.get("destinationWarehouseId") ?? ""),
     relatedId: String(formData.get("relatedId") ?? ""),
     locationId: String(formData.get("locationId") ?? ""),
+    supplierId: String(formData.get("supplierId") ?? ""),
+    initialQuantity: String(formData.get("initialQuantity") ?? ""),
+    unitPrice: String(formData.get("unitPrice") ?? ""),
+    productId: String(formData.get("productId") ?? ""),
+    lineQuantity: String(formData.get("lineQuantity") ?? ""),
+    orderDate: String(formData.get("orderDate") ?? ""),
+    expiryDate: String(formData.get("expiryDate") ?? ""),
     detail: String(formData.get("detail") ?? ""),
     dueAt: String(formData.get("dueAt") ?? ""),
   };
@@ -272,10 +348,30 @@ export async function updateOperationalItem(formData: FormData) {
   const warehouseId = uuidOrNull(data.warehouseId);
   const destinationWarehouseId = uuidOrNull(data.destinationWarehouseId);
   const relatedId = uuidOrNull(data.relatedId);
+  const locationId = uuidOrNull(data.locationId);
+  const supplierId = uuidOrNull(data.supplierId);
+  const unitPrice = numberOrNull(data.unitPrice);
+  const productId = uuidOrNull(data.productId);
+  const lineQuantity = numberOrNull(data.lineQuantity);
+  const orderDate = data.orderDate || null;
+  const expiryDate = data.expiryDate || null;
   const dueAt = dateOrNull(data.dueAt);
   let error: { message: string } | null = null;
   if (data.module === "products") {
-    ({ error } = await supabase.from("products").update({ sku: data.reference.toUpperCase(), name: data.title, category: data.detail || null, reorder_point: quantity ?? 0, is_active: data.status === "active" }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+    if (!warehouseId || !locationId || !supplierId) routeTo(data.module, "Select a warehouse, location, and supplier.", "error");
+    if (quantity === null || quantity < 0 || unitPrice === null || unitPrice < 0) routeTo(data.module, "Reorder level and unit price must be non-negative numbers.", "error");
+    ({ error } = await supabase.from("products").update({
+      sku: data.reference.toUpperCase(),
+      name: data.title,
+      category: data.detail || null,
+      reorder_point: quantity,
+      unit_price: unitPrice,
+      default_supplier_id: supplierId,
+      default_warehouse_id: warehouseId,
+      default_location_id: locationId,
+      expiry_date: expiryDate,
+      is_active: data.status === "active",
+    }).eq("id", itemId.data).eq("organization_id", data.organizationId));
   } else if (data.module === "suppliers") {
     ({ error } = await supabase.from("suppliers").update({ code: data.reference.toUpperCase(), name: data.title, contact_email: data.detail || null, lead_time_days: quantity === null ? null : Math.round(quantity), status: data.status }).eq("id", itemId.data).eq("organization_id", data.organizationId));
   } else if (data.module === "locations") {
@@ -288,7 +384,39 @@ export async function updateOperationalItem(formData: FormData) {
   } else if (["receiving", "putaway", "picking"].includes(data.module)) {
     if (!warehouseId) routeTo(data.module, "Select a warehouse.", "error");
     ({ error } = await supabase.from("warehouse_tasks").update({ warehouse_id: warehouseId, reference: data.reference, title: data.title, status: data.status, quantity, due_at: dueAt, notes: data.detail || null }).eq("id", itemId.data).eq("organization_id", data.organizationId));
-  } else if (["requisitions", "rfqs", "quotations", "purchase_orders"].includes(data.module)) {
+  } else if (data.module === "purchase_orders") {
+    if (!relatedId || !warehouseId || !productId) routeTo(data.module, "Select a supplier, warehouse, and inventory item.", "error");
+    if (!orderDate || !data.dueAt) routeTo(data.module, "Select the order and expected delivery dates.", "error");
+    if (lineQuantity === null || lineQuantity <= 0 || unitPrice === null || unitPrice < 0) routeTo(data.module, "Enter a valid quantity and unit price.", "error");
+    const { data: selectedProduct, error: productError } = await supabase.from("products").select("name").eq("id", productId).eq("organization_id", data.organizationId).single();
+    if (productError || !selectedProduct) routeTo(data.module, "The selected inventory item is unavailable.", "error");
+    const total = lineQuantity * unitPrice;
+    ({ error } = await supabase.from("procurement_records").update({
+      reference: data.reference,
+      title: data.title,
+      supplier_id: relatedId,
+      warehouse_id: warehouseId,
+      status: data.status,
+      amount: total,
+      currency: "PHP",
+      order_date: orderDate,
+      delivery_date: data.dueAt,
+      due_at: dueAt,
+      notes: data.detail || null,
+    }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+    if (!error) {
+      ({ error } = await supabase.from("procurement_record_lines").upsert({
+        organization_id: data.organizationId,
+        procurement_record_id: itemId.data,
+        product_id: productId,
+        line_number: 1,
+        description: selectedProduct.name,
+        quantity: lineQuantity,
+        unit_price: unitPrice,
+        promised_date: data.dueAt,
+      }, { onConflict: "procurement_record_id,line_number" }));
+    }
+  } else if (["requisitions", "rfqs", "quotations"].includes(data.module)) {
     ({ error } = await supabase.from("procurement_records").update({ reference: data.reference, title: data.title, supplier_id: relatedId, warehouse_id: warehouseId, status: data.status, amount: quantity, currency: "PHP", due_at: dueAt, notes: data.detail || null }).eq("id", itemId.data).eq("organization_id", data.organizationId));
   } else if (data.module === "logistics") {
     ({ error } = await supabase.from("shipments").update({ reference: data.reference, title: data.title, carrier: data.detail || null, warehouse_id: warehouseId, status: data.status, due_at: dueAt }).eq("id", itemId.data).eq("organization_id", data.organizationId));
@@ -329,6 +457,24 @@ export async function updateOperationalStatus(formData: FormData) {
   if (error) routeTo(data.module, error.message, "error");
   refresh(data.module);
   routeTo(data.module, "Status updated.");
+}
+
+export async function deleteOperationalItem(formData: FormData) {
+  const deleteSchema = statusSchema.pick({ organizationId: true, module: true, itemId: true });
+  const result = deleteSchema.safeParse(Object.fromEntries(formData));
+  const fallback = moduleSchema.safeParse(formData.get("module")).success ? String(formData.get("module")) as OperationalModule : "products";
+  if (!result.success || !["products", "purchase_orders"].includes(result.data.module)) routeTo(fallback, "Invalid record reference.", "error");
+  const data = result.data;
+  const { supabase } = await requireContext(data.organizationId, data.module);
+  if (data.module === "products") {
+    const { error } = await supabase.from("products").update({ is_active: false }).eq("id", data.itemId).eq("organization_id", data.organizationId);
+    if (error) routeTo(data.module, error.message, "error");
+  } else {
+    const { error } = await supabase.from("procurement_records").delete().eq("id", data.itemId).eq("organization_id", data.organizationId).eq("record_type", "purchase_order");
+    if (error) routeTo(data.module, "This purchase order is already linked to another transaction and cannot be deleted.", "error");
+  }
+  refresh(data.module);
+  routeTo(data.module, data.module === "products" ? "Product deleted. Inventory history was preserved." : "Purchase order deleted.");
 }
 
 export async function downloadDocument(formData: FormData) {
