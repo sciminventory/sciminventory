@@ -23,7 +23,7 @@ export default async function OperationalModulePage({ params, searchParams }: { 
   if (!canViewOperationalModule(config.key, membership.role)) notFound();
 
   const organizationId = membership.organization_id;
-  const [warehouseResult, productResult, supplierResult, locationResult, locationInventoryCheck, productEntryCheck, purchaseOrderCheck] = await Promise.all([
+  const [warehouseResult, productResult, supplierResult, locationResult, locationInventoryCheck, productEntryCheck, purchaseOrderCheck, supplierDirectoryCheck] = await Promise.all([
     supabase.from("warehouses").select("id, code, name").eq("organization_id", organizationId).eq("is_active", true).order("code"),
     supabase.from("products").select("id, sku, name").eq("organization_id", organizationId).eq("is_active", true).order("sku"),
     supabase.from("suppliers").select("id, code, name").eq("organization_id", organizationId).eq("status", "active").order("code"),
@@ -37,8 +37,13 @@ export default async function OperationalModulePage({ params, searchParams }: { 
     config.key === "purchase_orders"
       ? supabase.from("procurement_records").select("order_date").eq("organization_id", organizationId).limit(1)
       : Promise.resolve({ data: [], error: null }),
+    config.key === "suppliers"
+      ? supabase.from("suppliers").select("contact_person, rating").eq("organization_id", organizationId).limit(1)
+      : Promise.resolve({ data: [], error: null }),
   ]);
-  const setupError = purchaseOrderCheck.error
+  const setupError = supplierDirectoryCheck.error
+    ? "The supplier directory requires database migration 022. Apply it in the database SQL editor, then refresh this page."
+    : purchaseOrderCheck.error
     ? "The purchase order interface requires database migration 020. Apply it in the database SQL editor, then refresh this page."
     : productEntryCheck.error
     ? "Product inventory entry requires database migration 019. Apply it in the database SQL editor, then refresh this page."
@@ -96,8 +101,19 @@ async function loadItems(supabase: Client, module: OperationalModule, organizati
     }));
   }
   if (module === "suppliers") {
-    const { data } = await supabase.from("suppliers").select("id, code, name, contact_email, phone, status, lead_time_days, created_at").eq("organization_id", organizationId).order("created_at", { ascending: false });
-    return (data ?? []).map((row) => ({ ...item(row.id, row.code, row.name, [row.contact_email, row.phone].filter(Boolean).join(" · "), row.status, row.lead_time_days, null, row.created_at, null), editDetail: row.contact_email ?? "" }));
+    const { data } = await supabase.from("suppliers").select("id, code, name, contact_person, contact_email, phone, tax_id, address_line, city, country_code, payment_terms_days, rating, status, created_at").eq("organization_id", organizationId).neq("status", "inactive").order("created_at", { ascending: false });
+    return (data ?? []).map((row) => ({
+      ...item(row.id, row.code, row.name, [row.contact_email, row.phone].filter(Boolean).join(" · "), row.status, row.rating, null, row.created_at, [row.city, row.country_code].filter(Boolean).join(", ") || null),
+      contactPerson: row.contact_person,
+      contactEmail: row.contact_email,
+      phone: row.phone,
+      taxId: row.tax_id,
+      address: row.address_line,
+      city: row.city,
+      country: row.country_code,
+      paymentTerms: row.payment_terms_days,
+      rating: Number(row.rating),
+    }));
   }
   if (module === "locations") {
     const [{ data }, { data: balances }] = await Promise.all([

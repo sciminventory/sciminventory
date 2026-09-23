@@ -32,6 +32,15 @@ const itemSchema = z.object({
   productId: z.string().trim(),
   lineQuantity: z.string().trim().max(30),
   orderDate: z.string().trim(),
+  contactPerson: z.string().trim().max(160),
+  contactEmail: z.string().trim().max(254),
+  phone: z.string().trim().max(50),
+  taxId: z.string().trim().max(80),
+  address: z.string().trim().max(240),
+  city: z.string().trim().max(120),
+  country: z.string().trim().max(2),
+  paymentTerms: z.string().trim().max(4),
+  rating: z.string().trim().max(4),
   expiryDate: z.string().trim(),
   detail: z.string().trim().max(240),
   dueAt: z.string().trim(),
@@ -108,6 +117,15 @@ export async function createOperationalItem(formData: FormData) {
     productId: String(formData.get("productId") ?? ""),
     lineQuantity: String(formData.get("lineQuantity") ?? ""),
     orderDate: String(formData.get("orderDate") ?? ""),
+    contactPerson: String(formData.get("contactPerson") ?? ""),
+    contactEmail: String(formData.get("contactEmail") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
+    taxId: String(formData.get("taxId") ?? ""),
+    address: String(formData.get("address") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    country: String(formData.get("country") ?? ""),
+    paymentTerms: String(formData.get("paymentTerms") ?? ""),
+    rating: String(formData.get("rating") ?? ""),
     expiryDate: String(formData.get("expiryDate") ?? ""),
     detail: String(formData.get("detail") ?? ""),
     dueAt: String(formData.get("dueAt") ?? ""),
@@ -130,6 +148,8 @@ export async function createOperationalItem(formData: FormData) {
   const productId = uuidOrNull(data.productId);
   const lineQuantity = numberOrNull(data.lineQuantity);
   const orderDate = data.orderDate || null;
+  const paymentTerms = numberOrNull(data.paymentTerms);
+  const rating = numberOrNull(data.rating);
   const expiryDate = data.expiryDate || null;
   const dueAt = dateOrNull(data.dueAt);
   let error: { message: string } | null = null;
@@ -154,13 +174,25 @@ export async function createOperationalItem(formData: FormData) {
       product_is_active: data.status !== "inactive",
     }));
   } else if (data.module === "suppliers") {
+    if (data.contactPerson.length < 2 || !z.email().safeParse(data.contactEmail).success || !data.phone || !data.taxId || !data.address || !data.city || !/^[A-Za-z]{2}$/.test(data.country)) routeTo(data.module, "Complete all supplier contact, tax, and location details.", "error");
+    if (paymentTerms === null || !Number.isInteger(paymentTerms) || paymentTerms < 0 || paymentTerms > 365) routeTo(data.module, "Payment terms must be between 0 and 365 days.", "error");
+    if (rating === null || rating < 0 || rating > 5) routeTo(data.module, "Rating must be between 0.00 and 5.00.", "error");
     ({ error } = await supabase.from("suppliers").insert({
       organization_id: data.organizationId,
       code: data.reference.toUpperCase(),
       name: data.title,
-      contact_email: data.detail || null,
-      lead_time_days: quantity === null ? null : Math.round(quantity),
+      legal_name: data.title,
+      contact_person: data.contactPerson,
+      contact_email: data.contactEmail.toLowerCase(),
+      phone: data.phone,
+      tax_id: data.taxId,
+      address_line: data.address,
+      city: data.city,
+      country_code: data.country.toUpperCase(),
+      payment_terms_days: paymentTerms,
+      rating,
       status: data.status || "active",
+      onboarding_status: data.status === "active" ? "approved" : "draft",
     }));
   } else if (data.module === "locations") {
     if (!warehouseId) routeTo(data.module, "Select a warehouse.", "error");
@@ -334,6 +366,15 @@ export async function updateOperationalItem(formData: FormData) {
     productId: String(formData.get("productId") ?? ""),
     lineQuantity: String(formData.get("lineQuantity") ?? ""),
     orderDate: String(formData.get("orderDate") ?? ""),
+    contactPerson: String(formData.get("contactPerson") ?? ""),
+    contactEmail: String(formData.get("contactEmail") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
+    taxId: String(formData.get("taxId") ?? ""),
+    address: String(formData.get("address") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    country: String(formData.get("country") ?? ""),
+    paymentTerms: String(formData.get("paymentTerms") ?? ""),
+    rating: String(formData.get("rating") ?? ""),
     expiryDate: String(formData.get("expiryDate") ?? ""),
     detail: String(formData.get("detail") ?? ""),
     dueAt: String(formData.get("dueAt") ?? ""),
@@ -354,6 +395,8 @@ export async function updateOperationalItem(formData: FormData) {
   const productId = uuidOrNull(data.productId);
   const lineQuantity = numberOrNull(data.lineQuantity);
   const orderDate = data.orderDate || null;
+  const paymentTerms = numberOrNull(data.paymentTerms);
+  const rating = numberOrNull(data.rating);
   const expiryDate = data.expiryDate || null;
   const dueAt = dateOrNull(data.dueAt);
   let error: { message: string } | null = null;
@@ -373,7 +416,24 @@ export async function updateOperationalItem(formData: FormData) {
       is_active: data.status === "active",
     }).eq("id", itemId.data).eq("organization_id", data.organizationId));
   } else if (data.module === "suppliers") {
-    ({ error } = await supabase.from("suppliers").update({ code: data.reference.toUpperCase(), name: data.title, contact_email: data.detail || null, lead_time_days: quantity === null ? null : Math.round(quantity), status: data.status }).eq("id", itemId.data).eq("organization_id", data.organizationId));
+    if (data.contactPerson.length < 2 || !z.email().safeParse(data.contactEmail).success || !data.phone || !data.taxId || !data.address || !data.city || !/^[A-Za-z]{2}$/.test(data.country)) routeTo(data.module, "Complete all supplier contact, tax, and location details.", "error");
+    if (paymentTerms === null || !Number.isInteger(paymentTerms) || paymentTerms < 0 || paymentTerms > 365) routeTo(data.module, "Payment terms must be between 0 and 365 days.", "error");
+    if (rating === null || rating < 0 || rating > 5) routeTo(data.module, "Rating must be between 0.00 and 5.00.", "error");
+    ({ error } = await supabase.from("suppliers").update({
+      code: data.reference.toUpperCase(),
+      name: data.title,
+      legal_name: data.title,
+      contact_person: data.contactPerson,
+      contact_email: data.contactEmail.toLowerCase(),
+      phone: data.phone,
+      tax_id: data.taxId,
+      address_line: data.address,
+      city: data.city,
+      country_code: data.country.toUpperCase(),
+      payment_terms_days: paymentTerms,
+      rating,
+      status: data.status,
+    }).eq("id", itemId.data).eq("organization_id", data.organizationId));
   } else if (data.module === "locations") {
     if (!warehouseId) routeTo(data.module, "Select a warehouse.", "error");
     ({ error } = await supabase.from("warehouse_locations").update({ warehouse_id: warehouseId, code: data.reference.toUpperCase(), name: data.title, location_type: data.status }).eq("id", itemId.data).eq("organization_id", data.organizationId));
@@ -463,18 +523,21 @@ export async function deleteOperationalItem(formData: FormData) {
   const deleteSchema = statusSchema.pick({ organizationId: true, module: true, itemId: true });
   const result = deleteSchema.safeParse(Object.fromEntries(formData));
   const fallback = moduleSchema.safeParse(formData.get("module")).success ? String(formData.get("module")) as OperationalModule : "products";
-  if (!result.success || !["products", "purchase_orders"].includes(result.data.module)) routeTo(fallback, "Invalid record reference.", "error");
+  if (!result.success || !["products", "purchase_orders", "suppliers"].includes(result.data.module)) routeTo(fallback, "Invalid record reference.", "error");
   const data = result.data;
   const { supabase } = await requireContext(data.organizationId, data.module);
   if (data.module === "products") {
     const { error } = await supabase.from("products").update({ is_active: false }).eq("id", data.itemId).eq("organization_id", data.organizationId);
     if (error) routeTo(data.module, error.message, "error");
-  } else {
+  } else if (data.module === "purchase_orders") {
     const { error } = await supabase.from("procurement_records").delete().eq("id", data.itemId).eq("organization_id", data.organizationId).eq("record_type", "purchase_order");
     if (error) routeTo(data.module, "This purchase order is already linked to another transaction and cannot be deleted.", "error");
+  } else {
+    const { error } = await supabase.from("suppliers").update({ status: "inactive" }).eq("id", data.itemId).eq("organization_id", data.organizationId);
+    if (error) routeTo(data.module, error.message, "error");
   }
   refresh(data.module);
-  routeTo(data.module, data.module === "products" ? "Product deleted. Inventory history was preserved." : "Purchase order deleted.");
+  routeTo(data.module, data.module === "products" ? "Product deleted. Inventory history was preserved." : data.module === "suppliers" ? "Supplier deleted. Transaction history was preserved." : "Purchase order deleted.");
 }
 
 export async function downloadDocument(formData: FormData) {

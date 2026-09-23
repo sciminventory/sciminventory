@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bell,
+  Building2,
   Boxes,
   BriefcaseBusiness,
   ChevronDown,
@@ -66,6 +67,7 @@ const navigation = [
       { label: "AI screening", href: "/dashboard/recruitment/screening" },
     ],
   },
+  { label: "Supplier", icon: Building2, href: modulePaths.suppliers },
   { label: "Vendors", icon: Users, href: "/dashboard/vendors" },
   { label: "Logistics", icon: Truck, href: modulePaths.logistics },
   { label: "Documents", icon: FileText, href: modulePaths.documents },
@@ -103,6 +105,7 @@ export function OperationsShell({
     if (item.label === "Recruitment") return recruitmentAccess;
     if (item.label === "Inventory" || item.label === "Warehouse") return canViewOperationalModule("stock", effectiveRole);
     if (item.label === "Purchase orders") return canViewOperationalModule("purchase_orders", effectiveRole);
+    if (item.label === "Supplier") return canViewOperationalModule("suppliers", effectiveRole);
     if (item.label === "Vendors") return hasPermission(effectiveRole, "vendors.read");
     if (item.label === "Logistics") return canViewOperationalModule("logistics", effectiveRole);
     if (item.label === "Documents") return canViewOperationalModule("documents", effectiveRole);

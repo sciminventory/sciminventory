@@ -189,7 +189,9 @@ export type Database = {
           code: string;
           name: string;
           contact_email: string | null;
+          contact_person: string | null;
           phone: string | null;
+          rating: number;
           status: string;
           lead_time_days: number | null;
           legal_name: string | null;
@@ -223,7 +225,9 @@ export type Database = {
           code: string;
           name: string;
           contact_email?: string | null;
+          contact_person?: string | null;
           phone?: string | null;
+          rating?: number;
           status?: string;
           lead_time_days?: number | null;
           legal_name?: string | null;
@@ -253,7 +257,9 @@ export type Database = {
           code?: string;
           name?: string;
           contact_email?: string | null;
+          contact_person?: string | null;
           phone?: string | null;
+          rating?: number;
           status?: string;
           lead_time_days?: number | null;
           legal_name?: string | null;
